@@ -33,7 +33,7 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
     }
 
     static Session::StringResponse signup_page(const unsigned status = 200, const std::string& err = "") {
-        static const char path[] = "signup.html";
+        static constexpr char path[] = "signup.html";
         Session::StringResponse res;
         res.result(status);
         res.set(boost::beast::http::field::content_type, "text/html");
@@ -44,7 +44,7 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
         return res;
     }
     static Session::StringResponse login_page(const unsigned status = 200, const std::string& err = "") {
-        static const char path[] = "login.html";
+        static constexpr char path[] = "login.html";
         Session::StringResponse res;
         res.result(status);
         res.set(boost::beast::http::field::content_type, "text/html");
@@ -56,22 +56,25 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
     }
 
     static Session::StringResponse portal_apps(const LocalUser& user) {
-        static const char path[] = "home.html";
         Session::StringResponse res;
         res.result(200);
         res.set(boost::beast::http::field::content_type, "text/html");
 
-#define FIY_PROTOCOL_PAGES_PORTAL_APPS_RULES(kv) \
-            kv("user_data", user.json()) \
-            kv("installed_apps", g_fiy->mods.get_mods_json())
+        static const std::string mods_json = g_fiy->mods.get_mods_json();
+        const std::string user_json = user.json();
 
+#define FIY_PROTOCOL_PAGES_PORTAL_APPS_RULES(kv) \
+            kv("user_data", user_json) \
+            kv("installed_apps", mods_json)
+
+        static constexpr char path[] = "home.html";
         res.body() = MIN_SSR_MUSTACHE(file_contents<path>(), FIY_PROTOCOL_PAGES_PORTAL_APPS_RULES);
 #undef FIY_PROTOCOL_PAGES_PORTAL_APPS_RULES
         return res;
     }
 
     static std::string portal_settings(const LocalUser& user) {
-        static const char path[] = "settings.html";
+        static constexpr char path[] = "settings.html";
 #define FIY_PROTOCOL_PAGES_PORTAL_SETTINGS_RULES(kv) kv("user_data", user.json())
         return MIN_SSR_MUSTACHE(file_contents<path>(), FIY_PROTOCOL_PAGES_PORTAL_SETTINGS_RULES);
 #undef FIY_PROTOCOL_PAGES_PORTAL_SETTINGS_RULES

@@ -17,7 +17,7 @@
 
 using DB::operator ""_sql;
 
-void send_to_peer(fiy::Callback cb, fiy::Request& req) {
+inline void send_to_peer(fiy::Callback cb, fiy::Request& req) {
     fiy::host().request_mod(fiy::host().app_id, &req, [cb, &req](const fiy::Response* res) {
         if (res == nullptr)
             req.respond(cb, 500,
@@ -28,20 +28,28 @@ void send_to_peer(fiy::Callback cb, fiy::Request& req) {
     });
 }
 
-bool ticket_api(
+inline bool ticket_api(
     std::string_view path,
     fiy::Callback cb,
     fiy::Request& req
 ) {
-    //
+    // TODO
+    return false;
 }
 
-bool repo_api(
+inline bool repo_api(
     std::string_view path,
     fiy::Callback cb,
     fiy::Request& req
 ) {
 
+    // TODO /commit/<owner>/<repo>/<commit-id>
+    // TODO /file/<owner>/<repo>/<branch>/path/to/entry
+
+    // this should be split up:
+    // - entries should have its own endpoint w/ branch and path params
+    // - info+stats endpoint
+    // - branch info (ie - last commit)
     if (path.starts_with("/info")) {
         path.remove_prefix(5);
         BasicRepo basic_repo;
@@ -183,7 +191,7 @@ bool repo_api(
     return false;
 }
 
-bool user_api(
+inline bool user_api(
     std::string_view path,
     const fiy::Callback cb,
     fiy::Request& req
@@ -324,7 +332,7 @@ bool user_api(
     return false;
 }
 
-bool api_router(
+inline bool api_router(
     std::string_view path,
     const fiy::Callback cb,
     fiy::Request& req

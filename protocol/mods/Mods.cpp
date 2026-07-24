@@ -48,7 +48,7 @@ void Mods::find_modules() {
         }
     }
 
-    LOG("Found " + std::to_string(m_mods.size()) + " mods");
+    LOG("Found " + std::to_string(m_mods.size()) + " mods.");
 }
 
 bool Mods::start_all() const {

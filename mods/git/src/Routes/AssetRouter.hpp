@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Router.hpp"
-
 #include "Pages.hpp"
 
 /**
@@ -15,7 +14,7 @@
  * @param req request object
  * @return true if routed, false otherwise
  */
-bool static_asset_router(
+inline bool static_asset_router(
     std::string_view path,
     const fiy::Callback cb,
     const fiy::Request &req
