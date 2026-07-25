@@ -14,6 +14,11 @@
 #include "Pages.hpp"
 #include "DB.hpp"
 
+// This file is getting kinda long, might make sense to break this up into separate files:
+// - mod routes (mod request routing)
+// - mod connector net api routes
+// - portal routes (login, signup, portal, settings, etc.)
+
 namespace http = boost::beast::http;
 
 /**
@@ -26,8 +31,8 @@ static void request_mod(std::shared_ptr<Session> conn, Mod* m, const std::string
     // No mod
     if (m == nullptr) {
         // No '' mod, use default index.html
-        if (conn->req().target() == "/"
-            && conn->req()["host"] == g_fiy->config.hostname
+        if (conn->req()["host"] == g_fiy->config.hostname
+            && conn->req().target() == "/"
         ) {
             static const char subpath[] = "/index.html";
             Session::StringResponse res{
@@ -37,6 +42,7 @@ static void request_mod(std::shared_ptr<Session> conn, Mod* m, const std::string
             };
             res.set(http::field::content_type, "text/html");
             conn->respond(conn->prep(std::move(res)));
+            DEBUG_LOG("No root mod, responding with landing page");
             return;
         }
 
@@ -66,12 +72,15 @@ static void request_mod(std::shared_ptr<Session> conn, Mod* m, const std::string
  * @param conn connection
  */
 static void mod_send_msg(std::shared_ptr<Session> conn) {
+    Mod* mod;
+    static Mod* root_mod = g_fiy->mods.get_mod("");
+
     // Mod-by-ID API
     auto path = conn->req().target();
     if (path.starts_with("/mods/")) {
         path.remove_prefix(6);
         const auto mod_end = path.find_first_of("/?");
-        Mod* mod = g_fiy->mods.get_mod_by_id(
+        mod = g_fiy->mods.get_mod_by_id(
             path.substr(0, mod_end));
         std::string subpath = conn->req()["Fiy-Path"];
         if (subpath.empty() && mod_end != std::string_view::npos)
@@ -89,10 +98,12 @@ static void mod_send_msg(std::shared_ptr<Session> conn) {
         if (hhn != hostname) {
             // Subdomain mod  mod.example.com/uri/path
             if (hostname.ends_with(hhn)) {
+                // Redirect to /<mod>/rest/of/path
                 const auto mod_name = hostname.substr(0, hostname.size() - hhn.size() - 1);
-                Mod* mod = g_fiy->mods.get_mod(mod_name);
-                // TODO instead redirect subdomain mods
-                request_mod(std::move(conn), mod, path);
+                Session::EmptyResponse res{http::status::moved_permanently, conn->req().version()};
+                const std::string new_path = concat('/', mod_name, path);
+                res.set(http::field::location, new_path);
+                conn->respond(std::move(res));
                 return;
             }
             //            Session::DynamicResponse res;
@@ -129,21 +140,40 @@ static void mod_send_msg(std::shared_ptr<Session> conn) {
         // case: /mod
         const auto qs_idx = path.find('?', 1);
         if (qs_idx == std::string_view::npos) {
-            Mod* mod = path.size() <= 1
-                ? g_fiy->mods.get_mod("")
-                : g_fiy->mods.get_mod(path.substr(1));
-            request_mod(std::move(conn), mod, "/");
+            // case: /
+            if (path.size() <= 1) {
+                request_mod(std::move(conn), root_mod, "/");
+                return;
+            }
+
+            // case: /mod
+            // case: /file_in_root_mod
+            mod = g_fiy->mods.get_mod(path.substr(1));
+            if (mod != nullptr) {
+                request_mod(std::move(conn), mod, "/");
+                return;
+            }
+            request_mod(std::move(conn), root_mod, path);
+            return;
+        }
+
+        // case: /?param
+        std::string sub_path = "/";
+        sub_path += path.substr(qs_idx);
+        if (qs_idx < 2) {
+            request_mod(std::move(conn), root_mod, sub_path);
             return;
         }
 
         // case: /mod?param
-        // case: /?param
-        std::string sub_path = "/";
-        sub_path += path.substr(qs_idx);
-        Mod* mod = qs_idx < 2
-            ? g_fiy->mods.get_mod("")
-            : g_fiy->mods.get_mod(path.substr(1, qs_idx - 1));
-        request_mod(std::move(conn), mod, sub_path);
+        mod = g_fiy->mods.get_mod(path.substr(1, qs_idx - 1));
+        if (mod != nullptr) {
+            request_mod(std::move(conn), mod, sub_path);
+            return;
+        }
+
+        // case: /file_in_root_mod?param
+        request_mod(std::move(conn), root_mod, path);
         return;
     }
 
@@ -153,11 +183,17 @@ static void mod_send_msg(std::shared_ptr<Session> conn) {
     // case: /mod/?param
     // case: /mod/uri/path?param
     // case: /mod/uri/path/?param
-    request_mod(
-        std::move(conn),
-        g_fiy->mods.get_mod(path.substr(1, slash_idx - 1)),
-        path.substr(slash_idx)
-    );
+    // case: /path/in/root/mod
+    mod = g_fiy->mods.get_mod(path.substr(1, slash_idx - 1));
+    if (mod != nullptr) {
+        request_mod(
+            std::move(conn),
+            g_fiy->mods.get_mod(path.substr(1, slash_idx - 1)),
+            path.substr(slash_idx)
+        );
+        return;
+    }
+    request_mod(std::move(conn), root_mod, path);
 }
 
 // TODO ?redirect=/mod/that/requires/auth query parameter
@@ -350,36 +386,8 @@ static void login_post(std::shared_ptr<Session>&& conn) {
     conn->respond(conn->prep(std::move(res)));
 }
 
-template <class Str>
-auto server_error(const Str& what) {
-    Session::StringResponse res;
-    res.result(http::status::internal_server_error);
-    res.set(http::field::content_type, "text/html");
-    res.body() = "An error occurred: '" + std::string(what) + "'";
-    return res;
-}
-
-std::vector<std::string> split_string(
-    const std::string_view str,
-    const std::string& delimiter
-) {
-    std::vector<std::string> ret;
-
-    std::string::size_type pos = 0;
-    std::string::size_type prev = 0;
-    while ((pos = str.find(delimiter, prev)) != std::string::npos) {
-        ret.emplace_back(str.substr(prev, pos - prev));
-        prev = pos + delimiter.size();
-    }
-
-    // To get the last substring (or only, if delimiter is not found)
-    ret.emplace_back(str.substr(prev));
-
-    return ret;
-}
-
 /// Sent to us from a peer that wants to connect
-void peer_handshake(std::shared_ptr<Session>&& conn) {
+static void peer_handshake(std::shared_ptr<Session>&& conn) {
     // TODO move logic to Peers::handshake ?
     switch (g_fiy->config.federation) {
         case FiyConfig::FederationStatus::ENABLED:
@@ -516,7 +524,8 @@ void peer_handshake(std::shared_ptr<Session>&& conn) {
     }
 }
 
-void login_user_internal(const std::shared_ptr<Session>& conn) {
+/// API used by ModConnectorNet
+static void login_user_internal(const std::shared_ptr<Session>& conn) {
     // TODO this should probably be encrypted or something
     const auto token = conn->req()["fiy-auth"];
     const auto username = conn->req()["fiy-user"];
@@ -564,33 +573,33 @@ void route_request(std::shared_ptr<Session> conn) {
                     return;
                 } else if (path.starts_with("/theme.js")) {
                     // Send cached file contents
-                    static const char subpath[] = "/theme.js";
+                    static constexpr char subpath[] = "/theme.js";
                     Session::StringResponse res{
                         http::status::ok,
                         conn->req().version(),
-                        Pages::file_contents<subpath>()
+                        Pages::mm_file<subpath>()
                     };
                     res.set(http::field::content_type, "text/javascript");
                     conn->respond(conn->prep(std::move(res)));
                     return;
                 } else if (path.starts_with("/main.css")) {
                     // Send cached file contents
-                    static const char subpath[] = "/assets/minstyle.io.min.css";
+                    static constexpr char subpath[] = "/assets/minstyle.io.min.css";
                     Session::StringResponse res{
                         http::status::ok,
                         conn->req().version(),
-                        Pages::file_contents<subpath>()
+                        Pages::mm_file<subpath>()
                     };
                     res.set(http::field::content_type, "text/css");
                     res.set(http::field::cache_control, "max-age=604800");
                     conn->respond(conn->prep(std::move(res)));
                     return;
                 } else if (path.starts_with("/app.svg")) {
-                    static const char subpath[] = "/assets/app.svg";
+                    static constexpr char subpath[] = "/assets/app.svg";
                     Session::StringResponse res{
                         http::status::ok,
                         conn->req().version(),
-                        Pages::file_contents<subpath>()
+                        Pages::mm_file<subpath>()
                     };
                     res.set(http::field::content_type, "image/svg+xml");
                     res.set(http::field::cache_control, "max-age=604800");

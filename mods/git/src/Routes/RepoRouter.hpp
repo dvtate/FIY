@@ -104,7 +104,7 @@ inline void repo_create_post(const fiy::Request& req, const fiy::Callback cb) {
     if (repo.instance != "") {
         auto req2 = req;
         req2.domain = repo.instance.c_str();
-        fiy::host().request_mod(fiy::host().app_id, &req, [cb, &req, repo](const fiy::Response* res) {
+        fiy::host().request_mod(fiy::host().app_id, &req2, [cb, &req, repo](const fiy::Response* res) {
             if (res == nullptr) {
                 const auto body = Pages::error_page(
                     "Peer Request Failed",
@@ -275,7 +275,7 @@ inline bool repo_router(
 
     if (subpath.starts_with("commit/")) {
         subpath.remove_prefix(7);
-        auto commit_id = subpath.substr(0, subpath.find_first_of("/?#"));
+        const auto commit_id = subpath.substr(0, subpath.find_first_of("/?#"));
 
         static const auto invalid_resp = fiy::Response{
             400,

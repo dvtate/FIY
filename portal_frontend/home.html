@@ -26,7 +26,7 @@
         <label for="ms-menu-toggle" class="ms-menu-icon">&#9776;</label>
         <ul>
             <li><a href="#">Settings</a></li>
-            <li><a href="#">Store</a></li>
+            <li><a href="#">Explore Apps</a></li>
             <li><a href="#" onclick="return false"><button id="theme-toggle" class="ms-outline">&9790;</button></a></li>
         </ul>
     </nav>
@@ -63,9 +63,9 @@
                             <div class="ms-card-content"><p>${description}</p></div>
                         </div>
                         <div class="col-md-2 app-actions">
-                            <a class="ms-btn ms-fullwidth ms-outline ms-primary" href="/${path}">Launch</a>
-                            ${ (canUpdate && user.isAdmin) ? `<button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="updateApp('${appId}')">Update</button>` : '' }
-                            ${ user.isAdmin ? `<button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="uninstallApp('${appId}')">Uninstall</button>` : ''}
+                            <a class="ms-btn ms-fullwidth ms-outline ms-primary" href="/${path}"><pre>/${path}</pre></a>
+                            ${ (canUpdate && user.isAdmin) ? `<button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="updateApp('${id}')">Update</button>` : '' }
+                            ${ user.isAdmin ? `<button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="uninstallApp('${id}')">Uninstall</button>` : ''}
                         </div>
                     </div>
                 </div>`;
@@ -89,21 +89,21 @@
     }
 
     // App actions
-    function launchApp(appId) {
-        window.location = '/mods/' + appId;
+    function launchApp(id) {
+        window.location = '/mods/' + id;
     }
 
-    function updateApp(appId) {}
-    function enableApp(appId) {}
-    function disableApp(appId) {}
-    function uninstallApp(appId) {
+    function updateApp(id) {}
+    function enableApp(id) {}
+    function disableApp(id) {}
+    function uninstallApp(id) {
         const ok = confirm('Are you sure you want to uninstall this app?');
         if (!ok)
             return;
         // TODO
     }
 
-    function checkStoreApp(appId) {
+    function checkStoreApp(id) {
         // send them to store page
     }
 

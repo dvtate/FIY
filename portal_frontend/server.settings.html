@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>FIY/{{domain}} - Home</title>
+    <meta name="description" content="Your home for federated apps" />
+
+    <link rel="stylesheet" type="text/css" href="/portal/main.css">
+    <script src="/portal/theme.js" defer></script>
+
+    <title>FIY Server Settings</title>
+
+</head>
+<body>
+    <div class="container">
+        <div class="about">
+            <h1>FIY Server Admin Settings</h1>
+            <p>This page is designed to provide an alternative to manually editing config files. Apparently that scares some
+                people.</p>
+        </div>
+
+        <fieldset>
+            <legend>Restart FIY Server</legend>
+            <p>In order to apply server settings changes, the server must be restarted.</p>
+            <p><b>WARNING:</b>This will log out all users!</p>
+            <button class="ms-bg-red">Restart FIY Server</button>
+        </fieldset>
+        <fieldset>
+            <legend>FIY Config</legend>
+            <p>These settings are generally read from config.ini file. Note that if you start the FIY server with command
+                overrides changing these settings may have no effect.</p>
+
+            <!-- TODO List FiyConfig settings (even if not editable) -->
+        </fieldset>
+
+        <fieldset>
+            <legend>Mod Settings</legend>
+            <p>Apps are internally referred to as "mods" or "modules." Here you can edit the settings for all installed mods.
+                Normally this is done by editing module.json files.</p>
+
+            <!-- TODO list out each mod in its own fieldset -->
+        </fieldset>
+    </div>
+</body>
+
+</html>

@@ -45,11 +45,9 @@ public:
     bool stop_all() const;
 
     Mod* get_mod(const std::string& path) {
-        auto ret = m_mods_lookup.find(path);
-        if (ret != m_mods_lookup.end())
+        if (const auto ret = m_mods_lookup.find(path); ret != m_mods_lookup.end())
             return ret->second;
-        else
-            return nullptr;
+        return nullptr;
     }
 
     Mod* get_mod_by_id(const std::string& id) {
@@ -65,7 +63,7 @@ public:
     }
 
     /// Get JSON list of installed apps for the user portal
-    [[nodiscard]] std::string get_mods_json() {
+    [[nodiscard]] std::string get_mods_json() const {
         std::string ret = "[";
         for (auto& m : m_mods) {
             ret += m->user_json();
@@ -73,6 +71,8 @@ public:
         }
         if (ret[ret.size() - 1] == ',')
             ret[ret.size() - 1] = ']';
+        else
+            ret += ']';
         return ret;
     }
 

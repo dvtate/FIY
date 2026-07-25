@@ -40,6 +40,7 @@ public:
     MMFile& operator=(const MMFile&) = delete;
     MMFile(MMFile&&) = default;
 
+    // TODO alternative with no exceptions?
     explicit MMFile(const char* path, const long offset = 0) {
         m_fd = open(path, O_RDONLY);
         if (m_fd < 0) [[unlikely]] {

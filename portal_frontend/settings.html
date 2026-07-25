@@ -1,25 +1,44 @@
-
-
-
-<!--
-2 columns:
-- lhs: user settings, system settings, [each individual] app settings, etc.
-
-
--->
-
-
 <!doctype html>
 <html>
 <head>
 
 </head>
 <body>
+    <fieldset>
+        <legend>End Session</legend>
+        <p>This will end your current session. Sessions on other devices and browsers will remain active.</p>
+        <button class="ms-bg-red" onclick="endSession()">End Session</button>
+    </fieldset>
+    <fieldset>
+        <legend>Log Out</legend>
+        <p>This will end all active sessions for your account, including on other devices and browsers.</p>
+        <button class="ms-bg-red" onclick="endAllSessions()">Log Out</button>
+    </fieldset>
+    <fieldset>
+        <legend>Delete Account</legend>
+        <p><b>Deleting your account is permanent.</b> In addition to removing your login credentials, it will tell all
+            installed apps/mods to delete any data that is associated with your account. For example, your contacts will
+            be deleted. This will not delete other users' data. For example, if another user has a contact for you, it
+            will not be deleted. Additionally, it is the apps responsibility to communicate your accounts' deletion to
+            other instances. This could result in lingering traces of your account. With your account deleted there is
+            also a risk of a malicious user attempting to impersonate you. If you still want to delete your account, we
+            totally understand, and we're sorry to see you go.</p>
+        <button class="ms-bg-red" onclick="">Permanently Log Out</button>
+    </fieldset>
 
     <script>
-        function end_session() {
-            // delete session cookie
+        function endSession() {
+            // It's http-only so maybe we should go through server?
+            document.cookie = "fiy_auth=; max-age=0"
             window.location = "/portal/login";
+        }
+        function endAllSessions() {
+
+        }
+
+        function deleteAccount() {
+            confirm("Are you sure you want to permanently delete your account as well as data associated with your account");
+            alert("Sorry, app logic is implemented but FIY server is still not implemented.");
         }
     </script>
 </body>
