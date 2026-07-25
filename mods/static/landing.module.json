@@ -1,0 +1,20 @@
+{
+  "name": "Landing Page",
+  "description": "This mod can serve static files and is preconfigured with a default landing page.",
+  "enabled": true,
+  "icon" : "",
+  "connector" : "shared_object",
+
+  "//" : "configured by default as a landing page",
+  "path" : "",
+
+  "id" : "static.landing",
+  "access" : "public",
+
+  "mod_settings": {
+    "root" : "public_html",
+    "index" : ["index.html"],
+    "list_directories": true,
+    "cache" : true
+  }
+}

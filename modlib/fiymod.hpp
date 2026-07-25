@@ -182,6 +182,10 @@ namespace fiy {
             m_headers = headers_str;
             headers = m_headers.c_str();
         }
+        void set_headers(std::string&& headers_str) {
+            m_headers = std::move(headers_str);
+            headers = m_headers.c_str();
+        }
 
 #if 0
         ~Response() {

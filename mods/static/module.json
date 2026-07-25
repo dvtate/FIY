@@ -10,6 +10,7 @@
   "mod_settings": {
     "root": "www",
     "index": ["index.html", "index.htm", "index.xhtml"],
-    "list_directories": true
+    "list_directories": true,
+    "cache": false
   }
 }

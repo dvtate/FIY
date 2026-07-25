@@ -8,6 +8,8 @@
 #include <fstream>
 #include <optional>
 
+#include "../../util/FileCache.hpp"
+
 #if defined __has_include
 #  if __has_include (<linux/limits.h>)
 #    include <linux/limits.h>
@@ -36,6 +38,13 @@ static std::vector<std::string> g_index_files{
 /// should we list the contents of the directory?
 static bool g_list_directory = true;
 
+/// Should the server and client cache files?
+static bool g_cache = false;
+
+/// Pre-cached root index
+// static MMFile* g_cached_index_file = nullptr;
+
+/// Make response for file
 static fiy::Response file_response(const fs::path& path) {
     // Respond with the file
     // fiy::host().log_info("Requested file: " + path->string());
@@ -50,10 +59,12 @@ static fiy::Response file_response(const fs::path& path) {
     }
 
     // posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+    static const std::string headers_prefix = g_cache
+        ? "Cache-Control: max-age=600\nContent-Type: "
+        : "Content-Type: ";
     res.body = fiy::Body(fd, 0);
     res.status = 200;
-    res.set_headers("Cache-Control: max-age=600\nContent-Type: "
-        + std::string(get_ext_mime_type(path.extension().string().substr(1))));
+    res.set_headers(headers_prefix + std::string(get_ext_mime_type(path.extension().string().substr(1))));
     return res;
 
     // FIY Host closes the file when it's done. Don't close it here.
@@ -62,35 +73,11 @@ static fiy::Response file_response(const fs::path& path) {
     //     fiy::host().log_error("failed to close() file: " + f->string());
 }
 
-
-/**
- * Concatenate components into a single string, reserving space before appending them
- * @tparam Args char or StringViewLike
- * @param args parts to combine into single string
- * @return concatenated string
- */
-template<typename... Args>
-__attribute__((always_inline))
-static constexpr inline std::string str_concat(const Args&... args) {
-    constexpr auto to_sv = []<typename T>(const T& v) constexpr {
-        if constexpr (std::is_same_v<T, char>)
-            return std::string_view(&v, 1);
-        else
-            return std::string_view(v);
-    };
-    return [](const auto ...sv) constexpr {
-        std::string ret;
-        ret.reserve((sv.size() + ...));
-        (ret.append(sv), ...);
-        return ret;
-    }(to_sv(args)...);
-}
-
 static std::string list_directory_body(const fs::path& path) {
     const std::string relative_path = fs::relative(path, g_static_root).string();
 
     // std::cout <<"relative( " <<g_static_root <<", " <<path <<") = " <<relative_path <<std::endl;;
-    std::string body = str_concat(
+    std::string body = concat(
         "<!DOCTYPE html><html><head><title>Index of ",
         relative_path,
         "</title><base href=\"",
@@ -105,7 +92,7 @@ static std::string list_directory_body(const fs::path& path) {
     for (const auto& entry : fs::directory_iterator(path)) {
         std::string p = entry.path().filename().string();
         if (entry.is_directory()) {
-            body += str_concat(
+            body += concat(
                 "<a href=\"./",
                 WebUtils::uri_encode(p),
                 "/\">",
@@ -113,7 +100,7 @@ static std::string list_directory_body(const fs::path& path) {
                 "/</a>\n"
             );
         } else {
-            body += str_concat(
+            body += concat(
                 "<a href=\"./",
                 WebUtils::uri_encode(p),
                 "\">",
@@ -123,21 +110,45 @@ static std::string list_directory_body(const fs::path& path) {
         }
     }
 
-    body += "</pre></body></html>";
+    body += "</pre>\n<!-- set mod_settings.list_directories to false to disable this page --></body></html>";
     return body;
+}
+
+static std::string get_error_404_body() {
+    std::string ret = load_file_as_string(g_static_root / "404.html");
+    if (!ret.empty())
+        return ret;
+
+    ret = concat("<h1>404: Not Found</h1>"
+        "<p>The page or file you are looking for could not be found."
+        " If you were trying to use an app it's possible that it is not installed or has a different path</p>"
+        "<hr/><a href=\"//",
+        fiy::host().domain,
+        "\">",
+        fiy::host().domain,
+        "</a> | <a href=\"//",
+        fiy::host().domain,
+        "/portal\">FIY Portal</a>\n\n<!-- to use a custom 404 page create a 404.html file -->"
+    );
+    return ret;
 }
 
 static void handle_request(fiy::Request& req, const fiy::fiy_callback_t cb) {
     try {
-        static const fiy::Response response_404{
-            404,
-            "Content-Type: text/html",
-            fiy::Body( "Error 404 - Not found" )
+        static const std::string body_404 = get_error_404_body();
+        static const fiy::fiy_response_t response_404{
+            .status = 404,
+            .headers = g_cache
+                ? "Cache-Control: max-age=600\nContent-Type: text/html"
+                : "Content-Type: text/html",
+            .body = fiy::Body(body_404)
         };
-        static const fiy::Response response_403{
-            403,
-            "Content-Type: text/html",
-            fiy::Body( "Error 403 - Forbidden" )
+        static const fiy::fiy_response_t response_403{
+            .status=403,
+            .headers = g_cache
+                ? "Cache-Control: max-age=600\nContent-Type: text/html"
+                : "Content-Type: text/html",
+            .body = fiy::Body("Error 403 - Forbidden")
         };
 
         // Strip query string and fragment
@@ -160,6 +171,14 @@ static void handle_request(fiy::Request& req, const fiy::fiy_callback_t cb) {
             url_path = url_path.substr(pos);
         else
             url_path = "";
+
+        // // Cached index file (probably overkill)
+        // if (url_path.empty() && g_cache) {
+        //     req.respond(cb, 200,
+        //     "Cache-Control: max-age=600\nContent-Type: text/html",
+        //         fiy::Body(g_cached_index_file->data(), g_cached_index_file->size()));
+        //     return;
+        // }
 
         // Weakly canonical resolves ".." even if file doesn't exist
         fs::path normalized = fs::weakly_canonical(g_static_root / url_path);
@@ -212,7 +231,7 @@ static void handle_request(fiy::Request& req, const fiy::fiy_callback_t cb) {
         req.respond(cb, response_404);
         return;
     } catch (const fs::filesystem_error& e) {
-        std::string body = str_concat("<h1>Server Error</h1>Filesystem error: ", e.what());
+        std::string body = concat("<h1>Server Error</h1>Filesystem error: ", e.what());
         req.respond(cb, 500, "Content-Type: text/html", fiy::Body(body));
         return;
     }
@@ -265,6 +284,23 @@ FIY_EXPORT fiy::ModInfo* start(const fiy_host_info_t* host_info) {
             fiy::host().log_error("module.json: list_directories should be boolean");
         } else {
             g_list_directory = config["list_directories"].get<bool>();
+        }
+    }
+    if (config.contains("cache")) {
+        try {
+            g_cache = config["cache"].get<bool>();
+            // if (g_cache) {
+            //     for (const auto& f : g_index_files) {
+            //         try {
+            //             g_cached_index_file = new MMFile(g_static_root / f);
+            //         } catch (const MMFile::Error& e) {
+            //             // C++ automatically frees it
+            //             fiy::host().log_info("pre-caching root index: " + std::string(e.what()));
+            //         }
+            //     }
+            // }
+        } catch (...) {
+            fiy::host().log_error("module.json: Expected mod_settings.cache to be a boolean");
         }
     }
 

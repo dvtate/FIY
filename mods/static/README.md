@@ -9,11 +9,22 @@ Path that the static files are stored in.
 
 ### `mod_settings` . `index` (optional)
 Array of file names to check for if a folder is requested.
-- example: `["index.xhtml","index.html","index.htm"]`
+- default: `["index.html","index.htm","index.xhtml"]`
+
+### `mod_settings` . `list_directories` (optional)
+For directories without an index file, should the user be shown a list of files in the directory (`true`) or be given
+a 404 page (`false`)?
+- default: `true`
+
+### `mod_settings` . `cache` (optional)
+Should the client cache these files?
+- default: `false`
 
 ### Tips
 - The `id` field should be globally unique, the easiest way to ensure this is to use reverse domain naming convention 
   starting with the instance's domain, thus making giving it a local id.
+- do not use the same module.so file via symlink for multiple static mods
+  - ie - mods/blog and mods/static.root should each have their own copies of module.so
 - Also note that the `"access"` field can be used to restrict access to the mod.
 
 ## Problem: multi-path
