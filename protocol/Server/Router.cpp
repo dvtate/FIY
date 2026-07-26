@@ -94,16 +94,16 @@ static void mod_send_msg(std::shared_ptr<Session> conn) {
     // Subdomains
     const auto hostname = conn->req()[http::field::host];
     if (!hostname.empty()) {
-        const std::string_view hhn = g_fiy->config.hostname;
+        static const std::string_view hhn = g_fiy->config.hostname;
         if (hhn != hostname) {
             // Subdomain mod  mod.example.com/uri/path
             if (hostname.ends_with(hhn)) {
                 // Redirect to /<mod>/rest/of/path
                 const auto mod_name = hostname.substr(0, hostname.size() - hhn.size() - 1);
                 Session::EmptyResponse res{http::status::moved_permanently, conn->req().version()};
-                const std::string new_path = concat('/', mod_name, path);
+                const std::string new_path = concat(g_fiy->config.protocol, hhn, '/', mod_name, path);
                 res.set(http::field::location, new_path);
-                conn->respond(std::move(res));
+                conn->respond(conn->prep(res));
                 return;
             }
             //            Session::DynamicResponse res;
