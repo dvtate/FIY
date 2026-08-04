@@ -76,12 +76,10 @@ public:
      */
     static void request_impl(
         const char* app_id,
-        const fiy::fiy_request_t* request,
-        void* context,
-        void (*callback)(const struct fiy::fiy_response_t*, void*)
+        const fiy::fiy_request_t* request
     ) {
         // Send request to peer
-        g_fiy->peers.request_peer(request->domain, app_id, request, context, callback);
+        g_fiy->peers.request_peer(request->domain, app_id, request);
     }
 
     /**
@@ -136,7 +134,7 @@ class ModDllConnectorRequest : public fiy::fiy_request_t {
 
 public:
 
-    using RequestHandler = void (*)(struct fiy_request_t*, fiy::fiy_callback_t);
+    using RequestHandler = void (*)(const fiy_request_t*);
     RequestHandler on_request;
 
     // explicit ModDllConnectorRequest(std::shared_ptr<Session> conn, RequestHandler on_request):
@@ -149,7 +147,8 @@ public:
         const RequestHandler handle_request
     ):
         m_conn(std::move(conn)),
-        on_request(handle_request) {
+        on_request(handle_request)
+    {
         auto& r = m_conn->req();
 
         // Initialize fiy_request_t
@@ -172,13 +171,19 @@ public:
         }
 
         set_this_headers(m_conn->req().base());
+
+        this->context = static_cast<const void*>(this);
+        this->callback = [](const fiy::fiy_request_t* req, const fiy_response_t* res) {
+            auto* self = static_cast<const ModDllConnectorRequest*>(req->context);
+            self->respond(res);
+        };
     }
 
     [[nodiscard]] bool request_is_local() const {
         return domain == nullptr && user != nullptr;
     }
 
-    void callback(const fiy::fiy_response_t* r) const {
+    void respond(const fiy::fiy_response_t* r) const {
         switch (r->body.type) {
             case fiy::BodyType::FIY_BODY_NONE: {
                 Session::EmptyResponse res;
@@ -228,7 +233,7 @@ public:
                 break;
             }
         }
-        delete this;
+        delete this; // TODO Pool
     }
 
     // static char* new_cstr_from_string(const std::string_view s) {
@@ -357,16 +362,8 @@ void ModConnectorDll::handle_request(std::shared_ptr<Session> conn) {
 
     // Call mods in separate threadpool so that they don't block asio threads
     static ThreadPool<ModDllConnectorRequest*> request_handler{
-        [](ModDllConnectorRequest* r) {
-            r->on_request(r,
-                [](
-                    const fiy::fiy_request_t* req,
-                    const fiy::fiy_response_t* resp
-                ){
-                    const auto r = (ModDllConnectorRequest*) req;
-                    r->callback(resp); // this deletion of r
-                }
-            );
+        [](const ModDllConnectorRequest* r) {
+            r->on_request(r);
         },
         g_fiy->config.concurrency
     };
@@ -375,40 +372,7 @@ void ModConnectorDll::handle_request(std::shared_ptr<Session> conn) {
     request_handler.emplace(new ModDllConnectorRequest(std::move(conn), user, m_mod_info->on_request));
 }
 
-void ModConnectorDll::handle_request(
-    const fiy::fiy_request_t* req,
-    void* context,
-    void (*callback)(const struct fiy::fiy_response_t*, void*)
-) {
-    // Augmented request object with callback+context
-    // TODO maybe should just add a callback member to fiy_request_t
-    //      would simplify APIs a bit and we wouldn't need this:
-    struct ModDllConnectorRequestWrapper : public fiy::fiy_request_t {
-        ModDllConnectorRequestWrapper(
-            const fiy::fiy_request_t& req,
-            void (*callback)(const fiy::fiy_response_t*, void* context),
-            void* context
-        ): fiy::fiy_request_t(req), m_callback(callback), m_context(context)
-        {}
-
-        void callback(const fiy::fiy_response_t* res) const {
-            m_callback(res, m_context);
-            delete this;
-        }
-    private:
-        void (*m_callback)(const fiy::fiy_response_t*, void* context);
-        void* m_context;
-    };
-
-    // Send request to mod
-    fiy_request_t* r = new ModDllConnectorRequestWrapper(*req, callback, context);
-    m_mod_info->on_request(
-        r,
-        [](
-            const fiy::fiy_request_t* req,
-            const fiy::fiy_response_t* resp
-        ){
-            ((ModDllConnectorRequestWrapper*) req)->callback(resp);
-        }
-    );
+void ModConnectorDll::handle_request(const fiy::fiy_request_t* req) {
+    // Call request handler directly in same thread
+    m_mod_info->on_request(req);
 }

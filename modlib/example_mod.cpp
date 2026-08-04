@@ -6,7 +6,7 @@
 
 #include "fiymod.hpp"
 
-static void handle_request(fiy::fiy_request_t* _request, fiy::fiy_callback_t callback) {
+static void handle_request(const fiy::fiy_request_t* _request) {
     const auto* req = (fiy::Request*) _request;
 
     std::string body_str = "<ul>";
@@ -32,7 +32,7 @@ static void handle_request(fiy::fiy_request_t* _request, fiy::fiy_callback_t cal
            req->method_str(), req->path, req->user, req->domain,
            req->body, req->headers);
 
-    req->respond(callback, 200,
+    req->respond(200,
         "Content-Type: text/html",
         fiy::Body(body_str));
 }

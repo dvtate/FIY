@@ -24,6 +24,8 @@ namespace fiy {
 /// String versions of http verb
 extern const char* fiy_http_verb_strings[];
 
+struct fiy_response_t;
+
 /**
  * IPC request from a user
  */
@@ -51,7 +53,11 @@ struct fiy_request_t {
      * How big is the body
      * @note can't rely on null-terminators bc body could be binary format
      */
-    size_t body_len : 8 * (sizeof(size_t) - 1);
+#if UINTPTR_MAX == 0xFFFFFFFF
+    unsigned long long body_len : 32; // 32 bit CPU
+#else
+    unsigned long long body_len : 56;
+#endif
 
     /**
      * Request path
@@ -78,8 +84,17 @@ struct fiy_request_t {
      */
     const char* body;       // null = get request
 
-    // TODO change API: callback+context members
-    // fiy_respond(fiy_request_t* , fiy_response_t*)
+    /**
+     * Respond to this request
+     * @remarks the request pointer should be the request being responded to (ie - this)
+     * @remarks the response should be copied or used before returning to event loop
+     */
+    void (*callback)(const struct fiy_request_t*, const struct fiy_response_t*);
+
+    /**
+     * Possibly used by the respond callback
+     */
+    const void* context;
 };
 
 /**
@@ -156,12 +171,10 @@ struct fiy_response_t {
     struct fiy_body_t body;
 };
 
-typedef void (*fiy_callback_t)(const struct fiy_request_t* request, const struct fiy_response_t*);
-
 /// This is used to provide callbacks to the host
 struct fiy_mod_info_t {
     /// Handle http requests to the module
-    void (*on_request)(struct fiy_request_t* request, fiy_callback_t callback)
+    void (*on_request)(const struct fiy_request_t* request)
 #ifdef __cplusplus
         {nullptr}
 #endif
@@ -254,19 +267,15 @@ struct fiy_host_info_t {
      *      path     - uri path
      *      domain   - remote server to send request to or nullptr if local inter-app request
      *      user     - local user or nullptr if unauthenticated
-     * @param context this pointer is passed back to the callback at the end
-     * @param callback called with response
+     *                  cannot be remote user, user's host is only instance that can act on their behalf
+     *      callback - called by other mod to provide response
+     *      context  - data relevant to handle callback
      * @notes
      * - local apps can send requests to each other without restrictions
      * - an app on server a can only send requests to apps on server b on behalf of users residing on server a
      *    - this prevents false impersonation
      */
-    void (*request)(
-            const char* app_id,
-            const struct fiy_request_t* request,
-            void* context,
-            void (*callback)(const struct fiy_response_t*, void*)
-    );
+    void (*request)(const char* app_id, const struct fiy_request_t* request);
 
     /**
      * Authenticate an instance-local user
@@ -314,6 +323,9 @@ typedef struct fiy_mod_info_t* (*fiy_mod_start_function_t)(const struct fiy_host
 } // namespace fiy
 #endif
 
+#ifdef __cplusplus
 #define FIY_EXPORT  extern "C" __attribute__((visibility("default")))
-
+#else
+#define FIY_EXPORT  __attribute__((visibility("default")))
+#endif
 #endif //FIY_FIYMOD_H

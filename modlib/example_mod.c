@@ -6,9 +6,9 @@
 struct fiy_host_info_t* g_host_info;
 
 /// Handle incoming requests to for this mod
-static void handle_request(struct fiy_request_t* request, fiy_callback_t callback) {
+static void handle_request(const struct fiy_request_t* request) {
     // Allocate a body string to send to the user
-    size_t body_len = 50
+    const size_t body_len = 50
         + (request->user != NULL ? strlen(request->user) : 4)
         + (request->domain != NULL ? strlen(request->domain) : 4)
         + (10)
@@ -27,7 +27,7 @@ static void handle_request(struct fiy_request_t* request, fiy_callback_t callbac
     );
 
     // Pass response to callback
-    struct fiy_response_t resp = {
+    const struct fiy_response_t resp = {
         .status = 200,
         .headers = "Content-Type: text/html",
         .body = {
@@ -35,7 +35,7 @@ static void handle_request(struct fiy_request_t* request, fiy_callback_t callbac
             .buffer = { .data = body, .length = strlen(body) }
         }
     };
-    callback(request, &resp);
+    request->callback(request, &resp);
 
     // Cleanup
     free(body);
@@ -47,7 +47,7 @@ static void user_deleted(const char* username) {
 }
 
 /// Export that gets called before anything else
-struct fiy_mod_info_t* start(const struct fiy_host_info_t* host_info) {
+FIY_EXPORT struct fiy_mod_info_t* start(const struct fiy_host_info_t* host_info) {
     // Prepare and make sure everything is set up and installed correctly
     static struct fiy_mod_info_t mod_info = {
         .on_request = handle_request,
@@ -59,6 +59,6 @@ struct fiy_mod_info_t* start(const struct fiy_host_info_t* host_info) {
 }
 
 /// Export that gets called for the mod to do any cleanup before exit/dlclose
-void stop() {
+FIY_EXPORT void stop() {
     printf("Stopping mod");
 }

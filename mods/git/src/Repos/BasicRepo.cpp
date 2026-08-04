@@ -223,6 +223,6 @@ std::string BasicRepo::canonical_url(std::string url) {
     return url;
 }
 
-void BasicRepo::http_cgi(const fiy::Request& req, fiy::Callback cb) {
-    git_repo_cgi(req, cb);
+void BasicRepo::http_cgi(const fiy::Request& req) {
+    git_repo_cgi(req);
 }

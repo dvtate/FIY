@@ -70,6 +70,8 @@ protected:
     // Can only have GitRepo instance per repository
     explicit LocalRepo(const BasicRepo& repo);
 
+    ~LocalRepo();
+
     // TODO probably should make this static instance of generic class
     // TODO this should be in GitRepo, not here
     static RWMutex m_cache_mtx;

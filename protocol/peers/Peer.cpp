@@ -1,9 +1,13 @@
 //
 // Created by tate on 7/31/25.
 //
+
+#include  "../util/FileCache.hpp"
+
 #include "../FIY.hpp"
 
 #include "Peer.hpp"
+
 
 std::string Peer::sig(
     const std::string& appid,
@@ -13,12 +17,7 @@ std::string Peer::sig(
     const std::string& ts_str = std::to_string(g_fiy->now())
 ) const {
     return Crypto::hmac(auth.sym_key,
-        std::string("FIY")
-        + appid
-        + path
-        + user
-        + std::to_string(body_len)
-        + ts_str
+        concat("FIY", appid , path , user , std::to_string(body_len), ts_str)
     );
 }
 

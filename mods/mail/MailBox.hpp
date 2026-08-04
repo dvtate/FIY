@@ -16,8 +16,8 @@ struct Mail {
     std::vector<std::string> m_recipients;
     std::string m_subject;
     std::string m_body;
-    time_t m_date;
-    size_t m_index;
+    time_t m_date{0};
+    size_t m_index{0};
 
     Mail() = default;
 

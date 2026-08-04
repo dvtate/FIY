@@ -6,11 +6,7 @@
 
 #include "Pages.hpp"
 
-inline bool user_router(
-    std::string_view path,
-    fiy::Callback cb,
-    fiy::Request& req
-) {
+inline bool user_router(std::string_view path, const fiy::Request& req) {
     const size_t start = path[0] == '/' ? 1 : 0;
     const auto end = path.find_first_of("/?#", start);
     std::string_view user;
@@ -28,7 +24,7 @@ inline bool user_router(
     // TODO maybe would be good to give a 404 when user is local and not found?
 
     const auto body = Pages::user_page(user, req.is_local() ? req.user : nullptr);
-    req.respond(cb, 200,
+    req.respond(200,
         "Content-Type: text/html; charset=UTF-8\nCache-control: max-age=300",
         fiy::Body(body));
     return true;

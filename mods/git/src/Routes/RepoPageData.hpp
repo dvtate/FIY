@@ -27,7 +27,7 @@ struct RepoFileBrowserPageData : public BasicRepo {
     /// Project path we're looking at
     std::string project_path;
 
-    fiy::Locality visibility;
+    fiy::Locality visibility{fiy::Locality::PUBLIC};
 
     [[nodiscard]] std::string entries_html() const;
 };
@@ -48,10 +48,10 @@ struct RepoPageData : public RepoFileBrowserPageData {
     std::string description;
 
     /// Is this repo a fork of another repo?
-    std::string fork_of{};
+    std::string fork_of;
 
     /// When was this repo created?
-    time_t create_ts;
+    time_t create_ts{-1};
 
     std::string to_json();
     bool from_json(const std::string& json);

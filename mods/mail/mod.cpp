@@ -12,10 +12,10 @@
 
 #include "MailBox.hpp"
 
-MailBox g_mailbox;
+static MailBox g_mailbox;
 
-std::vector<std::string> split_string(const std::string& str,
-                                      const std::string& delimiter)
+static std::vector<std::string> split_string(const std::string& str,
+                                             const std::string& delimiter)
 {
     std::vector<std::string> strings;
 
@@ -33,10 +33,10 @@ std::vector<std::string> split_string(const std::string& str,
     return strings;
 }
 
-void send_mail(fiy::Request& req, const fiy::Callback cb) {
+static void send_mail(const fiy::Request& req) {
     // Unauthenticated
     if (req.user == nullptr) {
-        req.respond(cb, 401, "Unauthenticated");
+        req.respond( 401, "Unauthenticated");
         return;
     }
 
@@ -45,7 +45,7 @@ void send_mail(fiy::Request& req, const fiy::Callback cb) {
     std::string body = req.body;
     auto i = body.find('\n');
     if (i == std::string::npos) {
-        req.respond(cb, 400, "Invalid body");
+        req.respond( 400, "Invalid body");
         return;
     }
 
@@ -55,7 +55,7 @@ void send_mail(fiy::Request& req, const fiy::Callback cb) {
     const auto old_i = i + 1;
     i = body.find('\n', old_i);
     if (i == std::string::npos) {
-        req.respond(cb, 400);
+        req.respond( 400);
         return;
     }
 
@@ -85,15 +85,24 @@ void send_mail(fiy::Request& req, const fiy::Callback cb) {
 
         // Send to destination servers
         for (const auto& dom : doms) {
-            req.domain = dom.c_str();
+            auto* req2 = new fiy::Request(req);
+            req2->domain = dom.c_str();
+            fiy::host().request_mod("mail", req2, [req2](const fiy::Response* res) {
+                if (res == nullptr)
+                    fiy::host().log_warning("Failed to send mail to " + std::string(req2->domain));
+                else
+                    fiy::host().log_debug("Sent mail to: " + std::string(req2->domain));
+                delete req2;
+            });
+
             std::cout <<"Sending to: " <<dom <<std::endl;
-            fiy::host().request("mail", &req, nullptr, nullptr);
+            fiy::host().request("mail", &req);
         }
     }
-    req.respond(cb);
+    req.respond();
 }
 
-const std::string& header_links() {
+static const std::string& header_links() {
     static const std::string head = "<nav>"
         "<a href='" + fiy::host().host_base_uri() + "/portal'>" + fiy::host().domain + "</a>"
         " | <a href='" + fiy::host().base_uri + "/inbox'>Inbox</a>"
@@ -104,8 +113,8 @@ const std::string& header_links() {
 }
 
 
-static void handle_request(fiy_request_t* request, fiy::Callback cb) {
-    auto& req = *(fiy::Request*) request;
+static void handle_request(const fiy_request_t* request) {
+    const auto& req = *static_cast<const fiy::Request*>(request);
 
     std::cout <<"Mail: Path: "<<req.path <<std::endl;
     std::cout <<"Mail: User: "<<req.user_str() <<std::endl;
@@ -117,40 +126,40 @@ static void handle_request(fiy_request_t* request, fiy::Callback cb) {
             "Location: " + fiy::host().host_base_uri() + "/portal/login",
             fiy::Body()
         };
-        req.respond(cb, no_auth_resp);
+        req.respond( no_auth_resp);
         return;
     }
 
     if (strcmp(req.path, "/send") == 0) {
-        send_mail(req, cb);
+        send_mail(req);
         return;
     } else if (strcmp(req.path, "/") == 0) {
         static const std::string html = header_links() + "<h1>Welcome to Mail!</h1>"
             "<p>This demo mod is used to test federation protocol while providing basic communication functionality."
             " Messages are stored in server memory and thus may disappear without notice."
             "</p>";
-        req.respond(cb, 200, "Content-Type: text/html", fiy::Body(html));
+        req.respond( 200, "Content-Type: text/html", fiy::Body(html));
         return;
     } else if (strcmp(req.path, "/inbox") == 0) {
         // Authenticated local user
         if (req.domain == nullptr && req.user != nullptr) {
             const auto inbox = header_links() + g_mailbox.get_inbox_str(req.global_user_str());
-            req.respond(cb, 200, "Content-Type: text/html", fiy::Body(inbox));
+            req.respond( 200, "Content-Type: text/html", fiy::Body(inbox));
             return;
         }
 
         // Unauthenticated
-        req.respond(cb, 401, "Unauthenticated");
+        req.respond( 401, "Unauthenticated");
         return;
     } else if (strcmp(req.path, "/outbox") == 0) {
         if (req.domain == nullptr && req.user != nullptr) {
             const auto outbox = header_links() + g_mailbox.get_outbox_str(req.global_user_str());
-            req.respond(cb, 200, "Content-Type: text/html", fiy::Body(outbox));
+            req.respond( 200, "Content-Type: text/html", fiy::Body(outbox));
             return;
         }
 
         // Unauthenticated
-        req.respond(cb, 401, "Unauthenticated");
+        req.respond( 401, "Unauthenticated");
         return;
 
     } else if (strcmp(req.path, "/compose") == 0) {
@@ -175,18 +184,18 @@ static void handle_request(fiy_request_t* request, fiy::Callback cb) {
            "}\n"
            "</script>\n"
            "</body></html>";
-        req.respond(cb, 200, "Content-Type: text/html", compose_html);
+        req.respond( 200, "Content-Type: text/html", compose_html);
         return;
     } else if (strncmp(req.path, "/view/", strlen("/view/")) == 0) {
         const size_t idx = strtoul(req.path + strlen("/view/"), nullptr, 10);
         // TODO verify that the user has access to the email
         Mail m;
         if (! g_mailbox.get(idx, m)) {
-            req.respond(cb, 404, "Not found");
+            req.respond( 404, "Not found");
             return;
         }
         const auto body_str = header_links() + m.long_view();
-        req.respond(cb, 200, "Content-Type: text/html", fiy::Body(body_str));
+        req.respond( 200, "Content-Type: text/html", fiy::Body(body_str));
         return;
     }
 
@@ -202,7 +211,7 @@ static void handle_request(fiy_request_t* request, fiy::Callback cb) {
     if (req.path != nullptr)
         body += req.path;
 
-    req.respond(cb, 404, "Not found.");
+    req.respond( 404, "Not found.");
 }
 
 FIY_EXPORT fiy::ModInfo* start(const fiy_host_info_t* host_info) {

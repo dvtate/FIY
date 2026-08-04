@@ -17,21 +17,39 @@
 
 using DB::operator ""_sql;
 
-inline void send_to_peer(fiy::Callback cb, fiy::Request& req) {
-    fiy::host().request_mod(fiy::host().app_id, &req, [cb, &req](const fiy::Response* res) {
+inline void send_to_peer(const fiy::Request& req, const std::string& peer_domain) {
+    auto* remote_request = new fiy::Request(req);
+    remote_request->domain = peer_domain.c_str(); // for remote requests this is okay as long as we don't use it in callback
+    remote_request->context = static_cast<const void*>(&req);
+    remote_request->callback = [](const fiy_request_t* cb_req, const fiy::fiy_response_t* res) {
+        auto* local_req = static_cast<const fiy::Request*>(cb_req->context);
         if (res == nullptr)
-            req.respond(cb, 500,
+            local_req->respond(500,
                 "Content-Type: application/json",
                 R"({"error":"Peer request failed"})");
         else
-            req.respond(cb, *res);
-    });
+            local_req->respond(*res);
+        delete cb_req;
+    };
+
+    // fiy::host().request_mod(
+    //     fiy::host().app_id,
+    //     remote_request,
+    //     [req, remote_request](const fiy::Response* res) {
+    //         if (res == nullptr)
+    //             req.respond(500,
+    //                 "Content-Type: application/json",
+    //                 R"({"error":"Peer request failed"})");
+    //         else
+    //             req.respond(*res);
+    //         delete remote_request;
+    //     }
+    // );
 }
 
 inline bool ticket_api(
     std::string_view path,
-    fiy::Callback cb,
-    fiy::Request& req
+    const fiy::Request& req
 ) {
     // TODO
     return false;
@@ -39,8 +57,7 @@ inline bool ticket_api(
 
 inline bool repo_api(
     std::string_view path,
-    fiy::Callback cb,
-    fiy::Request& req
+    const fiy::Request& req
 ) {
 
     // TODO /commit/<owner>/<repo>/<commit-id>
@@ -55,8 +72,7 @@ inline bool repo_api(
         BasicRepo basic_repo;
         basic_repo.from_path(path);
         if (!basic_repo.is_local()) {
-            req.domain = basic_repo.instance.c_str();
-            send_to_peer(cb, req);
+            send_to_peer(req, basic_repo.instance);
             return true;
         }
 
@@ -67,16 +83,13 @@ inline bool repo_api(
 
         DTORepo dto;
         if (!repo->get_dto("", dto)) {
-            req.respond(cb, 500,
+            req.respond(500,
                 "content-type: text/plain",
                 fiy::Body("Sorry that failed"));
         }
 
         auto body = dto.to_json().dump();
-        req.respond(cb,
-            200,
-            "Content-Type: application/json",
-            body);
+        req.respond(200, "Content-Type: application/json", body);
         return true;
     }
     else if (path.starts_with("/search")) {
@@ -177,12 +190,12 @@ inline bool repo_api(
             //     ret.emplace_back(r.path());
             // std::string body = ret.dump();
             auto body = search.search(user, domain).dump();
-            req.respond(cb, 200,
+            req.respond(200,
                 "Content-type: application/json",
                 fiy::Body(body));
             return true;
         } catch (SQLite::Exception& e) {
-            req.respond(cb, 500,
+            req.respond(500,
                 "Content-type: application/json",
                 fiy::Body("[]"));
             return true;
@@ -193,15 +206,14 @@ inline bool repo_api(
 
 inline bool user_api(
     std::string_view path,
-    const fiy::Callback cb,
-    fiy::Request& req
+    const fiy::Request& req
 ) {
     // /api/user/:user/...endpoint
 
     // Parse user from path
     auto user_end = path.find_first_of("/?#");
     if (user_end == std::string_view::npos) {
-        req.respond(cb, 404, "Content-type: text/plain", "/api/user/:user endpoint expected user string");
+        req.respond(404, "Content-type: text/plain", "/api/user/:user endpoint expected user string");
         return true;
     }
     auto user_str = path.substr(0, user_end);
@@ -213,20 +225,9 @@ inline bool user_api(
     if (dom_sep != std::string_view::npos) {
         // Remote user - proxy request
         auto domain = user_str.substr(dom_sep + 1);
-        if (domain != fiy::host().domain) {
+        if (!domain.empty() && domain != fiy::host().domain) {
             // remote request
-            auto remote_domain = std::string(domain);
-            req.domain = remote_domain.c_str();
-            fiy::host().request_mod(fiy::host().app_id, &req,
-                [&](const fiy::Response* res) {
-                    if (res == nullptr) {
-                        req.respond(cb, 500,
-                            "Content-type: text/plain",
-                            fiy::Body("Failed to connect to peer"));
-                    } else {
-                        req.respond(cb, *res);
-                    }
-                });
+            send_to_peer(req, std::string(domain));
             return true;
         }
 
@@ -240,11 +241,11 @@ inline bool user_api(
         thread_local auto q = "SELECT COUNT(*) FROM RepoLikes WHERE user=?"_sql;
         if (!q.executeStep()) {
             fiy::host().log_error("User API: DB error: unable to SELECT COUNT(*) FROM RepoLikes");
-            req.respond(cb, 500, "Content-type: text/plain", fiy::Body("Database Error"));
+            req.respond(500, "Content-type: text/plain", fiy::Body("Database Error"));
         } else {
             const auto count = q.getColumn(0).getInt64();
             const auto body = std::to_string(count);
-            req.respond(cb, 200, "Content-type: application/json", body);
+            req.respond(200, "Content-type: application/json", body);
         }
         q.reset();
         return true;
@@ -270,7 +271,7 @@ inline bool user_api(
                 user_limit);
             constexpr int MAX_LIMIT = 10'000;
             if (ec != std::errc{} || user_limit < 0 || user_limit > MAX_LIMIT) {
-                req.respond(cb, 400, "Content-Type: text/plain", "Invalid limit parameter");
+                req.respond(400, "Content-Type: text/plain", "Invalid limit parameter");
                 return true;
             }
             limit = static_cast<uint16_t>(user_limit);
@@ -284,7 +285,7 @@ inline bool user_api(
                 it->second.data() + it->second.size(),
                 user_page);
             if (ec != std::errc{} || user_page < 0) {
-                req.respond(cb, 400, "Content-Type: text/plain", "Invalid page parameter");
+                req.respond(400, "Content-Type: text/plain", "Invalid page parameter");
                 return true;
             }
         }
@@ -301,7 +302,7 @@ inline bool user_api(
         q.reset();
 
         if (repos.empty()) {
-            req.respond(cb, 200, "Content-type: application/json", fiy::Body("[]"));
+            req.respond(200, "Content-type: application/json", fiy::Body("[]"));
             return true;
         }
 
@@ -324,7 +325,7 @@ inline bool user_api(
         ret += "\"]";
 
         // Send JSON
-        req.respond(cb, 200,
+        req.respond(200,
             "Content-type: application/json",
             fiy::Body(ret));
         return true;
@@ -334,8 +335,7 @@ inline bool user_api(
 
 inline bool api_router(
     std::string_view path,
-    const fiy::Callback cb,
-    fiy::Request& req
+    const fiy::Request& req
 ) {
     // Remove API prefix
     if (!path.starts_with("/api"))
@@ -348,35 +348,35 @@ inline bool api_router(
         // I added code to prevent users from signing up with this name
         // but leaving this to be safe
         // if (fiy::host().user_info("api", nullptr) == 0)
-        //     req.respond(cb, 200,
+        //     req.respond(200,
         //         "Content-type: text/html",
         //         "<h1>Congrats!</h1>"
         //         "<p>Your username is a reserved path!</p>"
         //         "<p>In order to use this mod, please add an @ symbol to your username. For example, \"/@api\".</p>"
         //         "<p>Sorry for any trouble</p>");
         // else
-            req.respond(cb, 400, "Not Found");
+            req.respond(400, "Not Found");
         return true;
     }
 
     if (path.starts_with("/repo")) {
         // Repo API endpoints
         path.remove_prefix(5);
-        if (repo_api(path, cb, req))
+        if (repo_api(path, req))
             return true;
     } else if (path.starts_with("/user/")) {
         // User API endpoints
         path.remove_prefix(6);
-        if (user_api(path, cb, req))
+        if (user_api(path, req))
             return true;
     } else if (path.starts_with("/ticket/")) {
         // Ticket API endpoints
         path.remove_prefix(8);
-        if (ticket_api(path, cb, req))
+        if (ticket_api(path, req))
             return true;
     }
 
     // Invalid endpoint
-    req.respond(cb, 404, "", "Not Found");
+    req.respond(404, "", "Not Found");
     return true;
 }

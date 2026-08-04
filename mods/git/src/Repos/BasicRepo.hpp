@@ -76,7 +76,7 @@ struct BasicRepo {
         const char* domain
     ) const;
 
-    void http_cgi(const fiy::Request& req, fiy::Callback cb);
+    void http_cgi(const fiy::Request& req);
 
 protected:
     bool user_can_access_local(

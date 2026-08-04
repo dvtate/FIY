@@ -17,7 +17,6 @@
 #include "fiymod.h"
 
 namespace fiy {
-    using Callback = fiy_callback_t;
     using ModInfo = fiy_mod_info_t;
     using BodyType = fiy_body_type;
     using StartFunction = fiy_mod_start_function_t;
@@ -308,9 +307,10 @@ namespace fiy {
          * - an app on server a can only send requests to apps on server b on behalf of users residing on server a
          *    - this prevents false impersonation
          */
+        // TODO change this, should include request in cb so caller can delete it
         void request_mod(
             const char* mod_id,
-            const struct fiy_request_t* request,
+            struct fiy_request_t* request,
             std::function<void(const Response*)> callback
         ) const {
             // Check params
@@ -323,15 +323,13 @@ namespace fiy {
 
             // Call host implementation
             auto* cb = new std::function{std::move(callback)};
-            this->request(
-                mod_id,
-                request,(void*) cb,
-                [](const fiy_response_t* response, void* context) {
-                    auto* cb = static_cast<decltype(&callback)>(context);
-                    (*cb)(static_cast<const Response*>(response));
-                    delete cb;
-                }
-            );
+            request->context = static_cast<void*>(cb);
+            request->callback = [](const fiy_request_t* req, const fiy_response_t* res) {
+                const auto* cb_fn = static_cast<const std::function<void(const Response*)>*>(req->context);
+                (*cb_fn)(static_cast<const Response*>(res));
+                delete cb_fn;
+            };
+            this->request(mod_id, request);
         }
     };
 
@@ -363,6 +361,7 @@ namespace fiy {
 
     // Must not add members or else not pointer compatible
     struct Request : public fiy_request_t {
+        using Callback = decltype(fiy_request_t::callback);
 
         // match those from boost::beast::http::verb
         enum Method : uint8_t {
@@ -382,7 +381,9 @@ namespace fiy {
             const char* user = nullptr,
             const char* headers = nullptr,
             const char* body = nullptr,
-            const size_t body_len = 0
+            const size_t body_len = 0,
+            const Callback callback = nullptr,
+            void* context = nullptr
         ): fiy_request_t{
             .domain=domain,
             .user=user,
@@ -391,6 +392,8 @@ namespace fiy {
             .path=path,
             .headers=headers,
             .body=body,
+            .callback = callback,
+            .context = context
         } {
         }
 
@@ -432,8 +435,8 @@ namespace fiy {
             return user != nullptr && domain == nullptr;
         }
 
-        inline void respond(const fiy_callback_t cb, const fiy_response_t& resp) const {
-            cb(this, &resp);
+        inline void respond(const fiy_response_t& resp) const {
+            this->callback(this, &resp);
         }
 
         /**
@@ -444,7 +447,6 @@ namespace fiy {
          * @param body HTTP body
          */
         void respond(
-            const fiy_callback_t cb,
             const int status = 200,
             const std::string& headers = "",
             const Body& body = Body()
@@ -454,10 +456,9 @@ namespace fiy {
                 .headers = headers.empty() ? nullptr : headers.c_str(),
                 .body = body,
             };
-            cb(this, &res);
+            this->callback(this, &res);
         }
         void respond(
-            const fiy_callback_t cb,
             const int status,
             const std::string& headers,
             const std::string& body
@@ -467,7 +468,7 @@ namespace fiy {
                 .headers = headers.empty() ? nullptr : headers.c_str(),
                 .body = Body(body),
             };
-            cb(this, &res);
+            this->callback(this, &res);
         }
 
         /**

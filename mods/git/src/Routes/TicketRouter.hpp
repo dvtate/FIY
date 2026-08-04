@@ -13,8 +13,7 @@
 
 bool ticket_router(
     std::string_view path,
-    fiy::Callback cb,
-    fiy::Request& req,
+    const fiy::Request& req,
     const BasicRepo& repo
 ) {
     return false;

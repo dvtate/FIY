@@ -106,7 +106,7 @@ void Peers::new_peer(const std::string& domain, std::function<void(std::shared_p
     DEBUG_LOG("Sending message to new peer " << domain);
 
     auto with_key_cb =
-        [this, domain, cb]
+        [this, domain = domain, cb]
         (http::response<http::string_body> res)
     {
         // Get key from response
@@ -233,14 +233,15 @@ void Peers::new_peer(const std::string& domain, std::function<void(std::shared_p
 }
 
 struct ScopedRequest {
+    fiy_request_t m_req;
     std::string m_domain;
     std::string m_user;
     std::string m_path;
     std::string m_headers;
     std::string m_body;
-    uint8_t m_method;
 
     explicit ScopedRequest(const fiy_request_t* req) {
+        m_req = *req;
         if (req->domain != nullptr)
             m_domain = req->domain;
         if (req->user != nullptr)
@@ -252,38 +253,35 @@ struct ScopedRequest {
         m_body = req->body == nullptr
             ? ""
             : std::string(req->body, req->body_len);
-        m_method = req->method;
+
+        m_req.domain=m_domain.empty() ? nullptr : m_domain.c_str();
+        m_req.user=m_user.empty() ? nullptr : m_user.c_str();
+        m_req.body_len=m_body.size();
+        m_req.path=m_path.empty() ? nullptr : m_path.c_str();
+        m_req.headers=m_headers.empty() ? nullptr : m_headers.c_str();
+        m_req.body=m_body.empty() ? nullptr : m_body.data();
     }
 
-    [[nodiscard]] fiy_request_t temp_copy() const {
-        return fiy_request_t{
-            .domain=m_domain.empty() ? nullptr : m_domain.c_str() ,
-            .user=m_user.empty() ? nullptr : m_user.c_str(),
-            .method=m_method,
-            .body_len=m_body.size(),
-            .path=m_path.empty() ? nullptr : m_path.c_str(),
-            .headers=m_headers.empty() ? nullptr : m_headers.c_str(),
-            .body=m_body.empty() ? nullptr : m_body.data(),
-        };
+    [[nodiscard]] const fiy_request_t& req() const {
+        return m_req;
     }
+
 };
 
 void Peers::request_peer(
     const std::string& domain,
     const std::string& appid,
-    const fiy_request_t* req,
-    void* context,
-    void (*callback)(const fiy_response_t*, void*)
+    const fiy_request_t* req
 ) {
     // Local request
     if (domain.empty() || domain == g_fiy->config.hostname) {
         Mod* m = g_fiy->mods.get_mod_by_id(appid);
         if (m != nullptr) {
-            m->ipc->handle_request(req, context, callback);
+            m->ipc->handle_request(req);
         } else {
             DEBUG_LOG("Missing local mod: " <<appid);
-            if (callback != nullptr)
-                callback(nullptr, context);
+            if (req->callback != nullptr)
+                req->callback(req, nullptr);
         }
         return;
     }
@@ -291,7 +289,7 @@ void Peers::request_peer(
     // Check peers cache
     auto p = get_peer_for_domain(domain);
     if (p != nullptr) {
-        request_peer(p, appid, req, context, callback);
+        request_peer(p, appid, req);
         return;
     }
     // TODO should have a separate cache to track invalid peers?
@@ -300,16 +298,15 @@ void Peers::request_peer(
     DEBUG_LOG("Peer " <<domain <<" not in cache");
     new_peer(
         domain,
-        [this, appid = appid, request = ScopedRequest(req), callback, context]
+        [this, appid = appid, req]
         (std::shared_ptr<Peer> new_peer) {
             if (new_peer != nullptr) {
                 DEBUG_LOG("sending request to peer " <<new_peer->domain);
-                auto r = request.temp_copy(); // copied earlier to prevent invalidation
-                request_peer(new_peer, appid, &r, context, callback);
+                request_peer(new_peer, appid, req);
             } else {
                 DEBUG_LOG("couldn't link with peer");
-                if (callback != nullptr)
-                    callback(nullptr, context);
+                if (req->callback != nullptr)
+                    req->callback(req, nullptr);
             }
         }
     );
@@ -318,14 +315,12 @@ void Peers::request_peer(
 void Peers::request_peer(
     const std::shared_ptr<Peer>& peer,
     const std::string& appid,
-    const fiy_request_t* req,
-    void* context,
-    void (*callback)(const fiy_response_t*, void*)
+    const fiy_request_t* req
 ) {
     // Null check
     if (peer == nullptr) {
-        if (callback != nullptr)
-            callback(nullptr, context);
+        if (req->callback != nullptr)
+            req->callback(req, nullptr);
         return;
     }
 
@@ -347,28 +342,27 @@ void Peers::request_peer(
     request.prepare_payload();
 
     // FIXME passing req here is unsafe !
-    auto cb = [this, context, callback, appid = appid, domain = peer->domain, req] (http::response<http::string_body> res) {
+    auto cb = [this, appid = appid, domain = peer->domain, req] (http::response<http::string_body> res) {
 //        std::cout <<"p2p response: " <<res <<std::endl;
         if (res.result_int() == PeerAuth::REAUTH_HTTP_STATUS) {
             DEBUG_LOG("Re-auth peer: " <<domain);
             // new peer with this as cb
             this->new_peer(
                 domain,
-                [this, appid, request = ScopedRequest(req), callback, context]
+                [this, appid, req ]
                 (std::shared_ptr<Peer> new_peer) {
                     if (new_peer != nullptr) {
                         DEBUG_LOG("sending request to peer " <<new_peer->domain);
-                        auto r = request.temp_copy(); // copied earlier to prevent invalidation
-                        this->request_peer(new_peer, appid, &r, context, callback);
+                        this->request_peer(new_peer, appid, req);
                     } else {
                         DEBUG_LOG("couldn't link with peer");
-                        if (callback != nullptr)
-                            callback(nullptr, context);
+                        if (req->callback != nullptr)
+                            req->callback(req, nullptr);
                     }
                 }
             );
         }
-        if (callback == nullptr)
+        if (req->callback == nullptr)
             return;
         auto headers_str = get_headers_string(res);
         const fiy_response_t response{
@@ -376,19 +370,20 @@ void Peers::request_peer(
             .headers = headers_str.c_str(),
             .body = fiy::Body(res.body())
         };
-        callback(&response, context);
+        req->callback(req, &response);
     };
 
-    auto err_cb = [context, callback](std::string err) {
-        if (callback == nullptr)
-            return;
-        const fiy_response_t response{
-            .status = -1,
-            .headers = "",
-            .body = fiy::Body(err)
-        };
-        callback(&response, context);
+    auto err_cb = [req](std::string err) {
         LOG_ERR("Peer request failed: " << err);
+        if (req->callback == nullptr)
+            return;
+        // const fiy_response_t response{
+        //     .status = -1,
+        //     .headers = "",
+        //     .body = fiy::Body(err)
+        // };
+        // req->callback(req, &response);
+        req->callback(req, nullptr);
     };
 
     bool use_https = std::string_view(peer->domain).find(':') == std::string_view::npos;

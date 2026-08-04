@@ -11,13 +11,11 @@
 /**
  * Function that routes requests to correct handlers
  * @param path request subpath
- * @param cb request callback
  * @param req request object
  */
 using RequestRouter = bool (*)(
     std::string_view path,
-    fiy::Callback cb,
-    fiy::Request& req
+    const fiy::Request& req
 );
 
-void handle_request(struct fiy::fiy_request_t* request, fiy::Callback cb);
+void handle_request(const struct fiy::fiy_request_t* request);

@@ -15,19 +15,19 @@
  * @param request incoming user request from host
  * @param cb callback from host
  */
-void handle_request(struct fiy::fiy_request_t* request, fiy::Callback cb) {
+void handle_request(const struct fiy::fiy_request_t* request) {
     auto& req = *(fiy::Request*)request;
 
     std::string_view path = req.path;
 
-    if ( static_asset_router(path, cb, req)
-        || user_router(path, cb, req)
-        || api_router(path, cb, req)
-        || repo_router(path, cb, req)
+    if ( static_asset_router(path, req)
+        || user_router(path, req)
+        || api_router(path, req)
+        || repo_router(path, req)
     )
         return;
 
     // No router
     // TODO custom 404 page?
-    req.respond(cb, 404, "", "Not Found");
+    req.respond(404, "", "Not Found");
 }

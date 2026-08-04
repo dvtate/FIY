@@ -46,15 +46,9 @@ public:
 
     /**
      * Handle a request from a local mod
-     * @param req request object
-     * @param context context to pass to callback
-     * @param callback callback to return control back to local mod
+     * @param req request object with callback + context
      */
-    virtual void handle_request(
-        const fiy::fiy_request_t* req,
-        void* context,
-        void (*callback)(const fiy::fiy_response_t*, void*)
-    ) = 0;
+    virtual void handle_request(const fiy::fiy_request_t* req) = 0;
 
     /// Handle user data deletion request
     virtual void delete_user(const char* user) = 0;

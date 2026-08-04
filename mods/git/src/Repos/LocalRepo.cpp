@@ -56,6 +56,11 @@ LocalRepo::LocalRepo(const BasicRepo& repo):
     q_fork.reset();
 }
 
+LocalRepo::~LocalRepo() {
+    RWMutex::LockForWrite lock{m_cache_mtx};
+    m_cache.erase(path());
+}
+
 bool LocalRepo::can_access(
     const Access min_level,
     const char* user,
@@ -259,14 +264,13 @@ void LocalRepo::cache_lru_push(const std::shared_ptr<LocalRepo>& repo) {
 
 std::shared_ptr<LocalRepo> LocalRepo::get_repo(const BasicRepo& repo) {
     // Look for it in the cache
-    auto rp = repo.path();
+    const auto rp = repo.path();
     {
         RWMutex::LockForRead lock{m_cache_mtx};
         auto it = m_cache.find(rp);
         if (it != m_cache.end()) {
             auto ret = it->second.lock();
             if (ret != nullptr) {
-                m_cache_mtx.read_unlock();
                 cache_lru_push(ret);
                 return ret;
             }
@@ -274,33 +278,35 @@ std::shared_ptr<LocalRepo> LocalRepo::get_repo(const BasicRepo& repo) {
     }
 
     // Add it to the cache
-    auto ret = std::shared_ptr<LocalRepo>(
-        static_cast<LocalRepo*>(malloc(sizeof(LocalRepo))),
-        [](LocalRepo* ptr) {
-            LocalRepo::m_cache_mtx.write_lock();
-            LocalRepo::m_cache.erase(ptr->path());
-            LocalRepo::m_cache_mtx.write_unlock();
-            ptr->~LocalRepo();
-            free(ptr);
+    RWMutex::LockForWrite lock{m_cache_mtx};
+    {
+        auto it = m_cache.find(rp);
+        if (it != m_cache.end()) [[unlikely]] {
+            auto ret = it->second.lock();
+            if (ret != nullptr) {
+                cache_lru_push(ret);
+                return ret;
+            }
         }
-    );
-    m_cache_mtx.write_lock();
-    auto p = m_cache.try_emplace(rp, ret);
-    m_cache_mtx.write_unlock();
-
-    // Another thread already inserted it
-    if (! p.second) [[unlikely]] {
-        return get_repo(repo);
     }
+    //
+    // auto ret = std::shared_ptr<LocalRepo>(
+    //     static_cast<LocalRepo*>(malloc(sizeof(LocalRepo))),
+    //     [](LocalRepo* ptr) {
+    //         LocalRepo::m_cache_mtx.write_lock();
+    //         LocalRepo::m_cache.erase(ptr->path());
+    //         LocalRepo::m_cache_mtx.write_unlock();
+    //         ptr->~LocalRepo();
+    //         free(ptr);
+    //     }
+    // );
 
-    if (p.second) {
-        // Do the actual construction outside the mutex
-        ::new(&*ret) LocalRepo(repo);
-    } else [[unlikely]]{
-        return get_repo(repo);
-    }
-
-
+    struct ConstructibleRepo : LocalRepo {
+        ConstructibleRepo(const BasicRepo& repo): LocalRepo(repo) {}
+    };
+    std::shared_ptr<LocalRepo> ret = std::make_shared<ConstructibleRepo>(repo);
+    m_cache[rp] = ret;
+    // ::new(&*ret) LocalRepo(repo);
     return ret;
 }
 

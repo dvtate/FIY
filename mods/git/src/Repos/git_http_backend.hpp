@@ -215,7 +215,7 @@ inline fiy::Response parse_cgi_output(const int fd) {
 /**
  * Wrapper around the git-http-backend CGI plugin included with git
  */
-inline void git_repo_cgi(const fiy::Request& req, fiy::Callback cb) {
+inline void git_repo_cgi(const fiy::Request& req) {
     std::string path{req.path};
 
     CGI cgi{{"git", "http-backend" }};
@@ -277,7 +277,7 @@ inline void git_repo_cgi(const fiy::Request& req, fiy::Callback cb) {
         auto r = cgi.run();
         if (r.status != 0) {
             fiy::log_error("git http-backend cgi failed");
-            req.respond(cb, 500, "Git CGI failed");
+            req.respond(500, "Git CGI failed");
             // std::cerr <<"\nstatus: " << r.status << std::endl;
             // std::cerr <<"\nstdout: " << r.stdout << std::endl;
             // std::cerr <<"err!\n";
@@ -296,7 +296,7 @@ inline void git_repo_cgi(const fiy::Request& req, fiy::Callback cb) {
         // std::cout << "--------------------------------------------\n";
         // std::cout << "\nCGI Result: " <<r.stdout << std::endl;
         // std::cout << "--------------------------------------------\n";
-        req.respond(cb, parse_cgi_output(r.stdout));
+        req.respond(parse_cgi_output(r.stdout));
         return;
     // }
     // auto r = cgi.run(fileno(f));

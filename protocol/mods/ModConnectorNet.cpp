@@ -171,11 +171,7 @@ void ModConnectorNet::delete_user(const char* user) {
         g_fiy->http.request(m_uri, req, cb, err_cb);
 }
 
-void ModConnectorNet::handle_request(
-    const fiy::fiy_request_t* req,
-    void* context,
-    void (*callback)(const fiy::fiy_response_t*, void*)
-) {
+void ModConnectorNet::handle_request(const fiy::fiy_request_t* req) {
     const fiy::Request& r = *req;
     namespace http = boost::beast::http;
     http::request<http::string_body> net_req;
@@ -192,8 +188,8 @@ void ModConnectorNet::handle_request(
     net_req.keep_alive(false);
     net_req.prepare_payload();
 
-    auto cb = [context, callback] (auto resp) {
-        if (callback == nullptr)
+    auto cb = [req] (auto resp) {
+        if (req->callback == nullptr)
             return;
 
         // Convert headers into a string
@@ -210,11 +206,11 @@ void ModConnectorNet::handle_request(
             .headers = headers_str.c_str(),
             .body = fiy::Body(resp.body())
         };
-        callback(&response, context);
+        req->callback(req, &response);
     };
-    auto err_cb = [this, context, callback] (auto err) {
+    auto err_cb = [this, req] (auto err) {
         DEBUG_LOG("Mod " <<m_mod->id <<": handle request failed " <<err);
-        if (callback == nullptr)
+        if (req->callback == nullptr)
             return;
 
         const fiy::fiy_response_t response{
@@ -222,7 +218,7 @@ void ModConnectorNet::handle_request(
             .headers = "",
             .body = fiy::Body(err),
         };
-        callback(&response, context);
+        req->callback(req, &response);
     };
 
     if (m_https)

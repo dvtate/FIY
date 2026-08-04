@@ -76,7 +76,7 @@ static fiy::Response file_response(const fs::path& path) {
 static std::string list_directory_body(const fs::path& path) {
     const std::string relative_path = fs::relative(path, g_static_root).string();
 
-    // std::cout <<"relative( " <<g_static_root <<", " <<path <<") = " <<relative_path <<std::endl;;
+    // std::cout <<"relative( " <<g_static_root <<", " <<path <<") = " <<relative_path <<std::endl;
     std::string body = concat(
         "<!DOCTYPE html><html><head><title>Index of ",
         relative_path,
@@ -133,7 +133,7 @@ static std::string get_error_404_body() {
     return ret;
 }
 
-static void handle_request(fiy::Request& req, const fiy::fiy_callback_t cb) {
+static void handle_request(const fiy::Request& req) {
     try {
         static const std::string body_404 = get_error_404_body();
         static const fiy::fiy_response_t response_404{
@@ -155,7 +155,7 @@ static void handle_request(fiy::Request& req, const fiy::fiy_callback_t cb) {
         const auto decoded_path = WebUtils::uri_decode(req.path, strlen(req.path));
 #ifdef PATH_MAX
         if (decoded_path.size() >= PATH_MAX) {
-            req.respond(cb, 400, "Content-Type: text/html",
+            req.respond(400, "Content-Type: text/html",
                 fiy::Body("Error 400: Path Length too long"));
             return;
         }
@@ -174,7 +174,7 @@ static void handle_request(fiy::Request& req, const fiy::fiy_callback_t cb) {
 
         // // Cached index file (probably overkill)
         // if (url_path.empty() && g_cache) {
-        //     req.respond(cb, 200,
+        //     req.respond(200,
         //     "Cache-Control: max-age=600\nContent-Type: text/html",
         //         fiy::Body(g_cached_index_file->data(), g_cached_index_file->size()));
         //     return;
@@ -190,14 +190,14 @@ static void handle_request(fiy::Request& req, const fiy::fiy_callback_t cb) {
         ).first;
         if (mismatch != g_static_root.end()) {
             // fiy::host().log_debug("Directory escape attempted: " + std::string(normalized));
-            req.respond(cb, response_403);
+            req.respond(response_403);
             return;
         }
 
         // File doesn't exist
         if (!fs::exists(normalized)) {
             // fiy::host().log_debug("File does not exist: " + std::string(normalized));
-            req.respond(cb, response_404);
+            req.respond(response_404);
             return;
         }
 
@@ -206,33 +206,33 @@ static void handle_request(fiy::Request& req, const fiy::fiy_callback_t cb) {
             for (const auto& index : g_index_files) {
                 fs::path index_path = normalized / index;
                 if (fs::exists(index_path) && fs::is_regular_file(index_path)) {
-                    req.respond(cb, file_response(index_path));
+                    req.respond(file_response(index_path));
                     return;
                 }
             }
 
             if (g_list_directory) {
                 const std::string body = list_directory_body(normalized);
-                req.respond(cb, 200, "Content-Type: text/html", fiy::Body(body));
+                req.respond(200, "Content-Type: text/html", fiy::Body(body));
                 return;
             }
 
-            req.respond(cb, response_404);
+            req.respond(response_404);
             return;
         }
 
         // Must exist and be a regular file
         if (fs::is_regular_file(normalized)) {
-            req.respond(cb, file_response(normalized));
+            req.respond(file_response(normalized));
             return;
         }
 
         // Maybe a pipe or fifo... let's just pretend it doesn't exist
-        req.respond(cb, response_404);
+        req.respond(response_404);
         return;
     } catch (const fs::filesystem_error& e) {
-        std::string body = concat("<h1>Server Error</h1>Filesystem error: ", e.what());
-        req.respond(cb, 500, "Content-Type: text/html", fiy::Body(body));
+        const std::string body = concat("<h1>Server Error</h1>Filesystem error: ", e.what());
+        req.respond(500, "Content-Type: text/html", fiy::Body(body));
         return;
     }
 }
@@ -306,8 +306,8 @@ FIY_EXPORT fiy::ModInfo* start(const fiy_host_info_t* host_info) {
 
     // Exchange info with host
     static fiy::ModInfo mod_info = {
-        .on_request = [](fiy_request_t* r, const fiy::fiy_callback_t cb) {
-            handle_request(static_cast<fiy::Request&>(*r), cb);
+        .on_request = [](const fiy_request_t* r) {
+            handle_request(static_cast<const fiy::Request&>(*r));
         },
         .delete_user = nullptr
     };

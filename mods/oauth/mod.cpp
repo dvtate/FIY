@@ -4,8 +4,8 @@
 #include "../../modlib/fiymod.hpp"
 
 
-void handle_request(struct fiy_request_t* request, fiy::Callback cb) {
-    auto& req = *(fiy::Request*) request;
+void handle_request(const struct fiy_request_t* request) {
+    auto& req = *(const fiy::Request*) request;
 
     switch ((fiy::Request::Method)req.method) {
         case fiy::Request::Method::GET:
