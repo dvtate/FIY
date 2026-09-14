@@ -1,144 +1,15 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Home</title>
-        <meta name="description" content="Your home for federated apps" />
-
-        <!-- TODO host local copies instead -->
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" />
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/minstyle.io@2.0.2/dist/css/minstyle.io.min.css" />
-
-        <style>
-            /* div {
-                border: 1px solid green;
-            } */
-        </style>
-    </head>
-    <body>
-        <div class="ms-menu">
-            <div class="ms-menu-logo">FIY</div>
-            <nav class="ms-menu-link">
-                <input type="checkbox" id="ms-menu-toggle" />
-                <label for="ms-menu-toggle" class="ms-menu-icon"><i class="fa fa-bars"></i></label>
-                <ul>
-                    <li><a href="#">Apps</a></li>
-                    <li><a href="#">Settings</a></li>
-                    <li><a href="#">Store</a></li>
-                    <li><a onclick="return false"><i class="fas fa-sun" id="theme-toggle"></i></a></li>
-                </ul>
-            </nav>
-        </div>
-
-        <div class="container">
-            <h1>Installed Apps</h1>
-            <input type="text" placeholder="Find an installed app..." id="apps-search" onkeyup="searchApps()" />
-
-
-            <!-- app item template-->
-            <span id="installed-apps-list">
-            </span>
-            
-        </div>
-
-        <script src="main.js"></script>
-
-        <script>
-            // From server
-            const user = {
-                isAdmin: true,
-            };
-            const installedApps = [
-                {
-                    name: 'GitIY',
-                    appId: 'git',
-                    iconUrl: 'https://www.zupimages.net/up/22/08/kl57.png',
-                    version: '0.1.5',
-                    installDate: 1715823299443,
-                    description: 'GitIY is an easy to use federated Git hosting service. You host your own git repos and can contribute to other people\'s projects.',
-                    canUpdate: false,
-                    enabled: true,
-                },
-
-                {
-                    name: 'GitIYYYYY',
-                    iconUrl: 'https://www.zupimages.net/up/22/08/kl57.png',
-                    version: '0.1.5',
-                    installDate: 1715823299443,
-                    description: 'GitIY is an easy to use federated Git hosting service. You host your own git repos and can contribute to other people\'s projects.', 
-                    appId: 'git2',
-                    canUpdate: true,
-                    enabled: true,
-                },
-                {
-                    name: 'farw',
-                    iconUrl: 'https://www.zupimages.net/up/22/08/kl57.png',
-                    version: '0.1.5',
-                    installDate: 1715823299443,
-                    description: 'asdgfasdf asdf is an easy to use federated Git hosting service. You host your own git repos and can contribute to other people\'s projects.', 
-                    appId: 'git2',
-                    canUpdate: true,
-                    enabled: false,
-                },
-            ];
-
-            function makeAppEntry({ name, iconUrl, version, installDate, description, appId, canUpdate }) {
-                return `<div class="ms-card ms-border ms-inline">
-                    <div class="row">
-                        <div class="ms-card-pic col-md-2">
-                            <a href="#" target="_blank">
-                                <img src="${iconUrl}" alt="${name} icon" />
-                            </a>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="ms-card-title">
-                                <h2>${name}</h2>
-                                <span>Version ${version} installed ${new Date(installDate).toLocaleString()}</span>
-                            </div>
-                            <div class="ms-card-content"><p>${description}</p></div>
-                        </div>
-                        <div class="col-md-2 app-actions">
-                            <button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="launchApp('${appId}')">Launch</button>
-                            <button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="checkStoreApp('${appId}')">About</button>
-                            ${ (canUpdate && user.isAdmin) ? `<button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="updateApp('${appId}')">Update</button>` : '' }
-                            ${ user.isAdmin ? `<button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="uninstallApp('${appId}')">Uninstall</button>` : ''}
-                        </div>
-                    </div>
-                </div>`;
-            }
-            installedApps.forEach(a => a.entryHtml = makeAppEntry(a));
-
-            function drawAppEntries(entries) {
-                const installedAppsList = document.getElementById('installed-apps-list');
-                installedAppsList.innerHTML = entries.map(e => e.entryHtml).join('');
-            }
-            drawAppEntries(installedApps);
-
-            function searchApps() {
-                // sort: title match then description match
-                const text = document.getElementById('apps-search').value;
-                const matchingTitle = new Set(installedApps.filter(e => e.name.includes(text)));
-                drawAppEntries([
-                    ...matchingTitle,
-                    ...installedApps.filter(e => !matchingTitle.has(e) && e.description.includes(text))
-                ]);
-            }
-
-            // App actions
-            function launchApp(appId) {}
-
-            function updateApp(appId) {}
-            function enableApp(appId) {}
-            function disableApp(appId) {}
-            function uninstallApp(appId) {
-                confirm('Are you sure you want to uninstall this app?');
-            }
-
-            function checkStoreApp(appId) {
-                // send them to store page
-            }
-
-        </script>
-    </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FIY/{{domain}}</title>
+  <link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
+</head>
+<body>
+{{navbar}}
+<main><!-- Page content --></main>
+<footer>FIY — Federate It Yourself.</footer>
+</body>
 </html>

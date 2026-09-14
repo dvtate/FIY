@@ -25,11 +25,32 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
 #undef FIY_PROTOCOL_PAGES_GLOBAL_DATA
     }
 
-    /// Automatically replace host_data in the loaded template
+    static std::string navbar(const LocalUser* user, const std::string_view current) {
+        const auto link = [current](const std::string_view path, const std::string& label) {
+            return "<a href=\"" + std::string(path) + "\""
+                + (current == path ? " class=\"current\" aria-current=\"page\"" : "")
+                + ">" + MinSSR::escape_html(label) + "</a>";
+        };
+        std::string links = link("/portal", user ? "Portal (" + user->username + ")" : "Portal");
+        if (!user) {
+            links += link("/portal/login", "Log In");
+            links += link("/portal/signup", "Sign Up");
+        }
+        static constexpr char path[] = "navbar.html";
+#define FIY_NAVBAR_RULES(kv) kv("navigation_links", links)
+        return MIN_SSR_MUSTACHE(FileCache::get_file_contents<path>(), FIY_NAVBAR_RULES);
+#undef FIY_NAVBAR_RULES
+    }
+
+    /// Cache file contents, but render navigation separately for every request.
     template<const char* FileSubPath>
-    static std::string file_contents() {
-        return pre_render_host_data(
-            FileCache::get_file_contents<FileSubPath>());
+    static std::string file_contents(const LocalUser* user = nullptr, const std::string_view current = "") {
+        const auto templ = pre_render_host_data(FileCache::get_file_contents<FileSubPath>());
+        if (templ.find("{{navbar}}") == std::string::npos) return templ;
+        const auto header = navbar(user, current);
+#define FIY_PAGE_NAVBAR_RULES(kv) kv("navbar", header)
+        return MIN_SSR_MUSTACHE_VARIABLE_TEMPLATE(templ, FIY_PAGE_NAVBAR_RULES);
+#undef FIY_PAGE_NAVBAR_RULES
     }
 
     static Session::StringResponse signup_page(const unsigned status = 200, const std::string& err = "") {
@@ -39,7 +60,7 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
         res.set(boost::beast::http::field::content_type, "text/html");
 #define FIY_PROTOCOL_PAGES_SIGNUP_PAGE_RULES(kv) kv( "fail_reason", err)
         // All version of the page are pre-rendered
-        res.body() =  MIN_SSR_MUSTACHE_VARIABLE_TEMPLATE(file_contents<path>(), FIY_PROTOCOL_PAGES_SIGNUP_PAGE_RULES);
+        res.body() =  MIN_SSR_MUSTACHE_VARIABLE_TEMPLATE(file_contents<path>(nullptr, "/portal/signup"), FIY_PROTOCOL_PAGES_SIGNUP_PAGE_RULES);
 #undef FIY_PROTOCOL_PAGES_SIGNUP_PAGE_RULES
         return res;
     }
@@ -50,7 +71,7 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
         res.set(boost::beast::http::field::content_type, "text/html");
 #define FIY_PROTOCOL_PAGES_LOGIN_PAGE_RULES(kv) kv( "fail_reason", err)
         // All version of the page are pre-rendered
-        res.body() =  MIN_SSR_MUSTACHE_VARIABLE_TEMPLATE(file_contents<path>(), FIY_PROTOCOL_PAGES_LOGIN_PAGE_RULES);
+        res.body() =  MIN_SSR_MUSTACHE_VARIABLE_TEMPLATE(file_contents<path>(nullptr, "/portal/login"), FIY_PROTOCOL_PAGES_LOGIN_PAGE_RULES);
 #undef FIY_PROTOCOL_PAGES_LOGIN_PAGE_RULES
         return res;
     }
@@ -59,6 +80,7 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
         Session::StringResponse res;
         res.result(200);
         res.set(boost::beast::http::field::content_type, "text/html");
+        res.set(boost::beast::http::field::cache_control, "private, no-store");
 
         static const std::string mods_json = g_fiy->mods.get_mods_json();
         const std::string user_json = user.json();
@@ -68,7 +90,7 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
             kv("installed_apps", mods_json)
 
         static constexpr char path[] = "home.html";
-        res.body() = MIN_SSR_MUSTACHE(file_contents<path>(), FIY_PROTOCOL_PAGES_PORTAL_APPS_RULES);
+        res.body() = MIN_SSR_MUSTACHE_VARIABLE_TEMPLATE(file_contents<path>(&user, "/portal"), FIY_PROTOCOL_PAGES_PORTAL_APPS_RULES);
 #undef FIY_PROTOCOL_PAGES_PORTAL_APPS_RULES
         return res;
     }
@@ -76,7 +98,7 @@ struct Pages : public FileCache<fiy_portal_templates_dir> {
     static std::string portal_settings(const LocalUser& user) {
         static constexpr char path[] = "settings.html";
 #define FIY_PROTOCOL_PAGES_PORTAL_SETTINGS_RULES(kv) kv("user_data", user.json())
-        return MIN_SSR_MUSTACHE(file_contents<path>(), FIY_PROTOCOL_PAGES_PORTAL_SETTINGS_RULES);
+        return MIN_SSR_MUSTACHE_VARIABLE_TEMPLATE(file_contents<path>(&user), FIY_PROTOCOL_PAGES_PORTAL_SETTINGS_RULES);
 #undef FIY_PROTOCOL_PAGES_PORTAL_SETTINGS_RULES
     }
 };
