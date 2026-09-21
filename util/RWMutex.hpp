@@ -24,23 +24,27 @@ struct RWMutex {
 
     /// Scoped write_lock + write_unlock
     struct LockForWrite {
-        RWMutex& m_mtx;
         explicit LockForWrite(RWMutex& mtx): m_mtx(mtx) {
             mtx.write_lock();
         }
+        LockForWrite(const LockForWrite&) = delete;
         ~LockForWrite() {
             m_mtx.write_unlock();
         }
+    private:
+        RWMutex& m_mtx;
     };
 
     /// Scoped read_lock + read_unlock
     struct LockForRead {
-        RWMutex& m_mtx;
         explicit LockForRead(RWMutex& mtx): m_mtx(mtx) {
             mtx.read_lock();
         }
+        LockForRead(const LockForRead&) = delete;
         ~LockForRead() {
             m_mtx.read_unlock();
         }
+    private:
+        RWMutex& m_mtx;
     };
 };

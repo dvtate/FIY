@@ -37,7 +37,7 @@ bool LocalUsers::add_user(const LocalUser& user, std::string password) {
 
     q.bindNoCopy(1, user.get_username());
     q.bind(2, (int32_t)user.is_admin);
-    q.bind(3, (void*)hp, LocalUser::PASSWORD_HASH_SIZE);
+    q.bindNoCopy(3, (void*)hp, LocalUser::PASSWORD_HASH_SIZE);
     q.bindNoCopy(4, user.email);
     q.bind(5, (int64_t) user.joined_ts);
     const auto ret = q.exec();
@@ -45,7 +45,9 @@ bool LocalUsers::add_user(const LocalUser& user, std::string password) {
     q.reset();
     return ret > 0;
 
-    // TODO also add them to cache + return auth token
+    // Add user to cache
+    RWMutex::LockForWrite lock{m_mtx};
+    m_username_cache[user.get_username()] = std::make_shared<LocalUser>(user);
 }
 
 /**
@@ -54,23 +56,22 @@ bool LocalUsers::add_user(const LocalUser& user, std::string password) {
  * @return LocalUser object or null if no user exists with given username
  */
 std::shared_ptr<LocalUser> LocalUsers::get_user(const std::string& username) {
-    RWMutex::LockForRead lock{m_mtx};
+    // Fetch user from cache
+    {
+        RWMutex::LockForRead lock{m_mtx};
+        auto it = m_username_cache.find(username);
+        if (it != m_username_cache.end())
+            return it->second;
+    }
 
-    // Use cache
-    auto it = m_username_cache.find(username);
-    if (it != m_username_cache.end())
-        return it->second;
-
-    // Use database
+    // Fetch user from database
     thread_local auto query = "SELECT isAdmin, email, joinTs"
         " FROM Users WHERE username = ?"_sql;
     query.bindNoCopy(1, username);
     if (!query.executeStep()) {
         query.reset();
-        return nullptr;
+        return nullptr; // user not in the database
     }
-
-    // Construct user object
     auto user = std::make_shared<LocalUser>(
         username,
         query.getColumn(0).getInt() != 0, // isAdmin
@@ -78,8 +79,13 @@ std::shared_ptr<LocalUser> LocalUsers::get_user(const std::string& username) {
         query.getColumn(2).getUInt()  // join_ts
     );
     query.reset();
-    m_username_cache[username] = user;
-    return user;
+
+    // Update cache
+    {
+        RWMutex::LockForWrite lock{m_mtx};
+        m_username_cache[username] = user;
+        return user;
+    }
 }
 
 /**
