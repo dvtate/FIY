@@ -43,7 +43,7 @@ bool FiyConfig::from_file(const std::string& path) {
     return ret;
 }
 
-bool FiyConfig::from_argv(int argc, char** argv) {
+bool FiyConfig::from_argv(const int argc, char** argv) {
     // TODO use a proper command line library instead
     if (argc <= 1)
         return from_file(CONFIG_FILE_PATH);
@@ -60,7 +60,8 @@ bool FiyConfig::from_argv(int argc, char** argv) {
         if (strcmp(p, "help") == 0) {
             std::cout <<"Usage: " <<argv[0] <<" [CONFIG_FILE_PATH] [CONFIG_OVERRIDES]...\n\n"
                 "\tConfig overrides have the same names as in the config file but must be prepended with '--'";
-            continue;
+            exit(0);
+            return false;
         }
 
         if (i + 1 >= argc) {
