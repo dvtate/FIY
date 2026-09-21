@@ -61,7 +61,8 @@ public:
 
     bool get_repo_page_data(const std::string& branch, RepoPageData& data);
     // bool get_repo_page_data(const std::string& branch, const std::string& path, RepoFileBrowserPageData& data);
-    bool get_dto(const std::string& branch, DTORepo& dto);
+
+    bool get_info_dto(DTORepoInfo& dto);
 
 protected:
     /// Used to create new repo

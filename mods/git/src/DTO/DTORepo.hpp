@@ -6,7 +6,6 @@
 
 #include <vector>
 
-#include "../Repos/LocalRepo.hpp"
 #include "../Repos/GitRepo.hpp"
 #include "DataTransferObject.hpp"
 
@@ -14,67 +13,71 @@
 //      but it's designed to use exceptions and it's not pretty so idk.
 //      I'll just half-ass it for now.
 
-struct DTORepo : DataTransferObject {
 
-    /// List of files/dirs/objects
-    struct DTORepoEntries : DataTransferObject {
-        std::vector<GitRepo::Entry> entries;
+/// Information that could vary by branch/subpath/ref/etc.
+struct DTORepoTree : DataTransferObject {
+    /// Last commit made to this tree
+    GitRepo::Commit last_commit;
 
-        bool from_json(const nlohmann::json& json) final;
-        nlohmann::json to_json() final;
-    };
+    /// What branch is this tree on
+    std::string active_branch;
 
-    /// Information that could vary by branch/subpath/ref/etc.
-    struct DTORepoTreeData : DataTransferObject {
-        GitRepo::Commit last_commit;
-        std::string active_branch;
-        std::string path;
+    /// Subpath within directory structure
+    std::string path;
 
-        bool from_json(const nlohmann::json& json) final;
-        nlohmann::json to_json() final;
-    };
+    /// Files, directories, etc. within this tree
+    std::vector<GitRepo::Entry> entries;
 
-    /// Repo stats
-    struct DTORepoStats {
-        ssize_t commits_count{-1};
-        ssize_t tags_count{-1};
-        ssize_t branches_count{-1};
-        ssize_t likes_count{-1};
-        ssize_t tickets_count{-1};
-        ssize_t forks_count{-1};
-    };
+    /// How many commits
+    ssize_t commits_count{-1};
 
-    /// Basic repo info
-    struct DTORepoInfo {
-        /// Instance of repo owner
-        std::string instance;
+    std::string_view dto_class() final { return "repo.tree"; }
+    bool from_json(const nlohmann::json& json) final;
+    nlohmann::json to_json() final;
+};
 
-        /// Username of the repo owner
-        std::string owner;
+/// Basic repo info
+struct DTORepoInfo : DataTransferObject {
+    /// Instance of repo owner
+    std::string instance;
 
-        /// Repo name
-        std::string name;
+    /// Username of the repo owner
+    std::string owner;
 
-        /// User provided description for the repo
-        std::string description;
+    /// Repo name
+    std::string name;
 
-        /// Is this repo a fork of another repo?
-        std::string fork_of{};
+    /// User provided description for the repo
+    std::string description;
 
-        /// When was this repo created?
-        time_t create_ts{0};
+    /// Is this repo a fork of another repo?
+    std::string fork_of{};
 
-        /// Repo default visibility
-        fiy::Locality visibility{fiy::Locality::USER};
+    /// When was this repo created?
+    time_t create_ts{0};
 
-        std::string default_branch;
-    };
+    /// Repo default visibility
+    fiy::Locality visibility{fiy::Locality::USER};
 
-    DTORepoEntries entries;
-    DTORepoTreeData tree;
-    DTORepoStats stats;
-    DTORepoInfo info;
+    /// Default branch of the repo
+    std::string default_branch;
 
+    /// How many branches
+    ssize_t branches_count{-1};
+
+    /// How many likes?
+    ssize_t likes_count{-1};
+
+    /// How many tickets
+    ssize_t tickets_count{-1};
+
+    /// How many forks
+    ssize_t forks_count{-1};
+
+    /// How many tagged commits
+    ssize_t tags_count{-1};
+
+    std::string_view dto_class() final { return "repo.info"; }
     bool from_json(const nlohmann::json& json) final;
     nlohmann::json to_json() final;
 };

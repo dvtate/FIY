@@ -227,18 +227,27 @@ bool LocalRepo::get_repo_page_data(const std::string& branch, RepoPageData& data
     return true;
 }
 
-bool LocalRepo::get_dto(const std::string& branch, DTORepo& dto) {
-    // Get data from git
-    GitRepo::get_dto(branch, dto);
-    dto.info.visibility = this->visibility;
-    dto.info.description = this->description;
-    dto.info.fork_of = this->fork_of;
-    dto.info.owner = this->owner;
-    dto.info.name = this->name;
-    dto.info.instance = this->instance.empty() ? fiy::host().domain : this->instance;
-    dto.stats.likes_count = this->likes_count();
-    dto.stats.forks_count = this->forks_count();
-    dto.stats.tickets_count = this->tickets_count();
+bool LocalRepo::get_info_dto(DTORepoInfo& dto) {
+    // note: this info only changes if user pushes to the repo or the repo settings are changed
+    //  thus should cacheable
+
+    // Basic repo properties
+    dto.visibility = this->visibility;
+    dto.description = this->description;
+    dto.fork_of = this->fork_of;
+    dto.owner = this->owner;
+    dto.name = this->name;
+    dto.instance = this->instance.empty() ? fiy::host().domain : this->instance;
+
+    // These use the database
+    dto.likes_count = this->likes_count();
+    dto.forks_count = this->forks_count();
+    dto.tickets_count = this->tickets_count();
+
+    // These use the git repo
+    dto.default_branch = default_branch();
+    dto.branches_count = branches_count();
+    dto.tags_count = tags_count();
     return true;
 }
 

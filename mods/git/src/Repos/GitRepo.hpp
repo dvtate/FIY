@@ -12,7 +12,7 @@
 #include "BasicRepo.hpp"
 #include "GitUser.hpp"
 
-struct DTORepo;
+struct DTORepoTree;
 struct RepoPageData;
 struct RepoFileBrowserPageData;
 
@@ -106,6 +106,8 @@ public:
 
     [[nodiscard]] git_repository* repo() const { return m_repo; }
     [[nodiscard]] bool is_open() const { return m_repo != nullptr; }
+
+    // TODO should make these public/private depending on if they lock or not
     // [[nodiscard]] bool is_local() const { return m_local; }
     std::vector<std::string> tags();
     ssize_t tags_count();
@@ -117,6 +119,9 @@ public:
 
     int entries(std::vector<Entry>& ret, const std::string& branch, const std::string& path = "");
 
+    bool get_tree_dto_commit(DTORepoTree& dto, const std::string_view& commit, const std::string& path = "");
+    bool get_tree_dto_branch(DTORepoTree& dto, const std::string& branch, const std::string& path = "");
+
 protected:
     [[nodiscard]] git_revwalk* walker();
     int branch_tip(const std::string& branch, git_oid& oid);
@@ -127,7 +132,7 @@ protected:
     Commit last_commit(const git_oid* start_oid, const std::string& path, git_mailmap* mailmap);
 
     bool get_repo_page_data(const std::string& branch, RepoPageData& data);
-    bool get_dto(const std::string& branch, DTORepo& dto);
+    // bool get_dto(const std::string& branch, DTORepo& dto);
 
 private:
     static bool ok(int status, const std::string& message= "");

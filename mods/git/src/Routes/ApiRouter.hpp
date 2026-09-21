@@ -63,10 +63,6 @@ inline bool repo_api(
     // TODO /commit/<owner>/<repo>/<commit-id>
     // TODO /file/<owner>/<repo>/<branch>/path/to/entry
 
-    // this should be split up:
-    // - entries should have its own endpoint w/ branch and path params
-    // - info+stats endpoint
-    // - branch info (ie - last commit)
     if (path.starts_with("/info")) {
         path.remove_prefix(5);
         BasicRepo basic_repo;
@@ -81,15 +77,37 @@ inline bool repo_api(
         if (repo == nullptr || !repo->valid())
             return false;
 
-        DTORepo dto;
-        if (!repo->get_dto("", dto)) {
+        DTORepoInfo dto;
+        if (!repo->get_info_dto(dto)) {
             req.respond(500,
                 "content-type: text/plain",
                 fiy::Body("Sorry that failed"));
+            return true;
         }
 
         auto body = dto.to_json().dump();
         req.respond(200, "Content-Type: application/json", body);
+        return true;
+    }
+    else if (path.starts_with("/tree")) {
+        path.remove_prefix(5);
+        BasicRepo basic_repo;
+        basic_repo.from_path(path);
+        if (!basic_repo.is_local()) {
+            send_to_peer(req, basic_repo.instance);
+            return true;
+        }
+
+        // Handle local repo
+        const auto repo = LocalRepo::get_repo(basic_repo);
+        if (repo == nullptr || !repo->valid())
+            return false;
+
+        // TODO get branch from remaining path
+        // TODO get subpath from remaining path
+        // TODO get tree dto
+        // TODO respond with json
+        req.respond(500, "Content-type: text/plain", fiy::Body("not implemented"));
         return true;
     }
     else if (path.starts_with("/search")) {

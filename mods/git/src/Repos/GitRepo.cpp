@@ -563,25 +563,34 @@ bool GitRepo::get_repo_page_data(const std::string& branch, RepoPageData& data) 
     return true;
 }
 
-bool GitRepo::get_dto(const std::string& branch, DTORepo& dto) {
-    // No lock required
-    dto.tree.active_branch = branch.empty() ? default_branch() : branch;
+bool GitRepo::get_tree_dto_branch(DTORepoTree& dto, const std::string& branch, const std::string& path) {
+    dto.active_branch = branch;
+    dto.path = path;
 
-    // These lock themselves
-    dto.info.default_branch = default_branch();
-    dto.stats.branches_count = branches_count();
-    dto.stats.tags_count = tags_count();
-
-    // These expect the mutex to be locked already
     std::lock_guard lock{m_mtx};
     git_oid target;
-    if (!ok(branch_tip(dto.tree.active_branch, target), "branch_tip"))
+    if (!ok(branch_tip(dto.active_branch, target), "branch_tip"))
         return false;
 
-    dto.stats.commits_count = commits_count(&target);
-    dto.tree.last_commit = last_commit(&target);
-    if (!ok(entries(dto.entries.entries, &target), "entries"))
+    dto.commits_count = commits_count(&target);
+    dto.last_commit = last_commit(&target);
+    if (!ok(entries(dto.entries, &target), "entries"))
+        return false;
+    return true;
+}
+
+bool GitRepo::get_tree_dto_commit(DTORepoTree& dto, const std::string_view& commit, const std::string& path) {
+    dto.path = path;
+
+    std::lock_guard lock{m_mtx};
+    git_oid target;
+    if (!ok(git_oid_fromstrn(&target, commit.data(), commit.size())))
         return false;
 
+    dto.commits_count = commits_count(&target);
+    dto.last_commit = last_commit(&target);
+    if (!ok(entries(dto.entries, &target), "entries"))
+        return false;
+    dto.active_branch = std::string(commit);
     return true;
 }
