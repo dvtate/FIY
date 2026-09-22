@@ -2,10 +2,10 @@
 This guide is mostly intended for developers and/or package maintainers.
 
 ## Interactive Installation Script
-The [`install.sh`](install.sh) script is currently the only way to install FIY.
+The [`install.sh`](install.sh) script is currently the only supported way to install FIY.
 
 Features:
-- Development installation that installs files as symlinks to relevant project files and build targets. 
+- Development installation that installs files as symlinks to relevant project files and build targets.
 - Makes it easy to install multiple instances on a single machine.
 
 ## config.ini
@@ -39,8 +39,8 @@ For example, this nginx.conf should work:
     server {
         listen 80;
         listen [::]:80;
-        server_name bodge.dev;
-        server_name *.bodge.dev;
+        server_name fiy.to;
+        server_name *.fiy.to;
         access_log /var/log/nginx/fiy.access.log;
         location / {
             proxy_pass http://127.0.0.1:8848;
@@ -50,11 +50,11 @@ For example, this nginx.conf should work:
     server {
         listen 443 ssl;
         listen [::]:443 ssl;
-        server_name bodge.dev;
-        server_name *.bodge.dev;
+        server_name fiy.to;
+        server_name *.fiy.to;
         access_log /var/log/nginx/fiy.access.log;
-        ssl_certificate  /etc/letsencrypt/live/bodge.dev-0001/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/bodge.dev-0001/privkey.pem;
+        ssl_certificate  /etc/letsencrypt/live/fiy.to-0001/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/fiy.to-0001/privkey.pem;
         location / {
             proxy_pass http://127.0.0.1:8848;
             proxy_set_header Host $host;

@@ -2,13 +2,6 @@
 A federation protocol and platform that makes it easy to make and host federated apps.
 
 ## Building
-### Download Sources
-Clone this repo and submodules.
-
-```
-git clone https://fiy.to/git/fiy/fiy --recurse-submodules
-```
-
 ### Install Build Dependencies
 - cmake
 - npm
@@ -21,7 +14,18 @@ git clone https://fiy.to/git/fiy/fiy --recurse-submodules
 - openssl
 - libcrypto
 
-<!-- TODO commands for common distros -->
+```
+$ # Arch Linux
+$ sudo pacman -S cmake npm git boost sqlite nlohmann-json libgit2 curl openssl crypto++
+```
+<!-- TODO commands for other common distros -->
+
+### Download Sources
+Clone this repo and submodules.
+
+```
+git clone https://fiy.to/git/fiy/fiy --recurse-submodules
+```
 
 ### Build
 Run `build.sh`.

@@ -26,7 +26,7 @@ These are just some ideas
   - especially w/ std::string_view's
 - Use `std::string_view` where it makes sense to reduce copies
 - Members designed to be public should not start with `m_`
-- Replace custom RWMutex with std::shared_mutex
+- Replace nlohmann JSON with [glaze](https://github.com/stephenberry/glaze)
 
 ## Portal+Protocol Server Features
 - [minify](https://www.npmjs.com/package/minify) html+css+js?
