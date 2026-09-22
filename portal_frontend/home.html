@@ -1,112 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>FIY/{{domain}} - Home</title>
-    <meta name="description" content="Your home for federated apps" />
-
-    <link rel="stylesheet" type="text/css" href="/portal/main.css">
-    <script src="/portal/theme.js" defer></script>
-
-    <style>
-        /* div {
-            border: 1px solid green;
-        } */
-        #theme-toggle {
-            /*font-weight: bolder;*/
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Installed Apps — FIY/{{domain}}</title>
+  <meta name="description" content="Your home for federated apps">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
 </head>
 <body>
-<div class="ms-menu">
-    <div class="ms-menu-logo">FIY / {{domain}}</div>
-    <nav class="ms-menu-link">
-        <input type="checkbox" id="ms-menu-toggle" />
-        <label for="ms-menu-toggle" class="ms-menu-icon">&#9776;</label>
-        <ul>
-            <li><a href="#">Settings</a></li>
-            <li><a href="#">Explore Apps</a></li>
-            <li><a href="#" onclick="return false"><button id="theme-toggle" class="ms-outline">&9790;</button></a></li>
-        </ul>
-    </nav>
-</div>
-
-<div class="container">
-    <h1>Installed Apps</h1>
-    <input type="text" placeholder="Find an installed app..." id="apps-search" onkeyup="searchApps()" autofocus />
-
-    <!-- list of installed apps -->
-    <span id="installed-apps-list"></span>
-</div>
-
+{{navbar}}
+<main>
+  <div class="page-head"><h1>Installed Apps</h1></div>
+  <div class="search"><input type="search" placeholder="Find an installed app..." id="apps-search" aria-label="Find an installed app" autofocus></div>
+  <div class="apps" id="installed-apps-list"></div>
+  <p class="empty-state" id="apps-empty" role="status" hidden></p>
+</main>
 <script>
-    // From server
-    const user = {{user_data}};
-    const installedApps = {{installed_apps}};
-    installedApps.sort((a,b) => a.name.localeCompare(b.name));
+  const installedApps = {{installed_apps}};
+  installedApps.sort((a, b) => a.name.localeCompare(b.name));
 
-    // id, path, version, name, description, icon, status, loaded, enabled, running, error
-    function makeAppEntry({ name, icon, version, description, id, path, canUpdate }) {
-        return `<div class="ms-card ms-border ms-inline">
-                    <div class="row">
-                        <div class="ms-card-pic col-md-2">
-                            <a href="/${path}" target="_blank">
-                                <img src="${icon}" alt="${name} icon" />
-                            </a>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="ms-card-title">
-                                <h2>${name}</h2>
-                                <span>${id} version ${version}</span>
-                            </div>
-                            <div class="ms-card-content"><p>${description}</p></div>
-                        </div>
-                        <div class="col-md-2 app-actions">
-                            <a class="ms-btn ms-fullwidth ms-outline ms-primary" href="/${path}"><pre>/${path}</pre></a>
-                            ${ (canUpdate && user.isAdmin) ? `<button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="updateApp('${id}')">Update</button>` : '' }
-                            ${ user.isAdmin ? `<button class="ms-btn ms-fullwidth ms-outline ms-primary" onclick="uninstallApp('${id}')">Uninstall</button>` : ''}
-                        </div>
-                    </div>
-                </div>`;
+  // Build elements with textContent so module metadata is displayed as text.
+  function makeAppEntry(app) {
+    const card = document.createElement('article');
+    card.className = 'app-card';
+    const icon = document.createElement('img');
+    icon.className = 'app-icon';
+    icon.alt = '';
+    icon.src = '/portal/app.svg';
+    if (app.icon) {
+      try {
+        const url = new URL(app.icon, window.location.origin);
+        if (['http:', 'https:'].includes(url.protocol)) icon.src = url.href;
+      } catch (_) { /* Use the built-in icon for invalid URLs. */ }
     }
-    installedApps.forEach(a => a.entryHtml = makeAppEntry(a));
+    icon.addEventListener('error', () => { icon.src = '/portal/app.svg'; }, { once: true });
+    const info = document.createElement('div');
+    info.className = 'app-info';
+    const name = document.createElement('h2');
+    name.textContent = app.name;
+    const version = document.createElement('p');
+    version.className = 'version';
+    version.textContent = `${app.id} version ${app.version}`;
+    const description = document.createElement('p');
+    description.textContent = app.description;
+    info.append(name, version, description);
+    const path = document.createElement('div');
+    path.className = 'app-path';
+    const link = document.createElement('a');
+    // Module paths are local, even when metadata contains leading slashes.
+    const localPath = '/' + String(app.path || '').replace(/^[\\/]+/, '');
+    link.setAttribute('href', localPath.replace(/\\/g, '/'));
+    link.textContent = localPath;
+    path.append(link);
+    card.append(icon, info, path);
+    return card;
+  }
 
-    function drawAppEntries(entries) {
-        const installedAppsList = document.getElementById('installed-apps-list');
-        installedAppsList.innerHTML = entries.map(e => e.entryHtml).join('');
-    }
-    drawAppEntries(installedApps);
-
-    function searchApps() {
-        // sort: title match then description match
-        const text = document.getElementById('apps-search').value;
-        const matchingTitle = new Set(installedApps.filter(e => e.name.includes(text) || e.id.includes(text)));
-        drawAppEntries([
-            ...matchingTitle,
-            ...installedApps.filter(e => !matchingTitle.has(e) && e.description.includes(text))
-        ]);
-    }
-
-    // App actions
-    function launchApp(id) {
-        window.location = '/mods/' + id;
-    }
-
-    function updateApp(id) {}
-    function enableApp(id) {}
-    function disableApp(id) {}
-    function uninstallApp(id) {
-        const ok = confirm('Are you sure you want to uninstall this app?');
-        if (!ok)
-            return;
-        // TODO
-    }
-
-    function checkStoreApp(id) {
-        // send them to store page
-    }
-
+  function searchApps() {
+    const text = document.getElementById('apps-search').value.trim().toLocaleLowerCase();
+    const matches = value => String(value || '').toLocaleLowerCase().includes(text);
+    const titleMatches = installedApps.filter(app => matches(app.name) || matches(app.id));
+    const entries = [...titleMatches, ...installedApps.filter(app => !titleMatches.includes(app) && matches(app.description))];
+    document.getElementById('installed-apps-list').replaceChildren(...entries.map(makeAppEntry));
+    const empty = document.getElementById('apps-empty');
+    empty.hidden = entries.length > 0;
+    empty.textContent = installedApps.length ? 'No apps match your search.' : 'No apps are installed on this instance yet.';
+  }
+  document.getElementById('apps-search').addEventListener('input', searchApps);
+  searchApps();
 </script>
 </body>
 </html>

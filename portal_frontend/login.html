@@ -1,45 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Log In - FIY/{{domain}}</title>
-    <meta name="description" content="Your home for federated apps" />
-    <link rel="stylesheet" type="text/css" href="/portal/main.css">
-    <script src="/portal/theme.js" defer></script>
-
-    <style>
-        /* div {
-            border: 1px solid green;
-        } */
-        #invalid-reason {
-            color: red;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In - FIY/{{domain}}</title>
+<meta name="description" content="Your home for federated apps">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Sign in to {{domain}}</h1>
-        <form method="post">
-            <div class="ms-form-group">
-                <label for="Username">Username</label>
-                <input type="text" name="username" id="Username" placeholder="Username" autocomplete="username" />
-            </div>
-            <div class="ms-form-group">
-                <label for="Password">Password</label>
-                <input type="password" name="password" id="Password" placeholder="Password" autocomplete="current-password" />
-            </div>
-<!--            <div class="ms-form-group">-->
-<!--                <label for="chk-stay-logged-in">Stay Logged In</label>-->
-<!--                <input type="checkbox" name="stay-logged-in" />-->
-<!--            </div>-->
-            <div><span id="invalid-reason">{{fail_reason}}</span></div>
-            <br/>
-            <div><button type="submit" id="btn-submit" class="ms-primary">Log In</button></div>
-        </form>
-        <hr>
-        <a href="/portal/signup">Create an account</a>
-        <br/><br/><a href="/">About {{domain}}</a>
+
+{{navbar}}
+
+<main>
+  <div class="login">
+    <h1>Sign in to {{domain}}</h1>
+
+    <form method="post">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username">
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+      </div>
+
+      <p class="error-msg" id="invalid-reason" role="alert">{{fail_reason}}</p>
+      <button id="btn-submit" type="submit" class="btn btn-primary">Log In</button>
+    </form>
+
+    <hr class="rule">
+
+    <div class="links">
+      <a href="/portal/signup">Create an account</a>
+      <a href="/">About {{domain}}</a>
     </div>
+  </div>
+</main>
+
+<footer>
+  FIY — Federate It Yourself.
+</footer>
+
 </body>
 </html>
