@@ -65,8 +65,8 @@ inline void repo_create_post(const fiy::Request& req) {
         std::string_view(req.body, req.body_len),
         form);
     if (!ok) {
-        req.respond(400, "", "Invalid Form Body");
         fiy::log_info("Repo create: " + req.user_str() + " submitted invalid form body");
+        req.respond(400, "", "Invalid Form Body");
         return;
     }
 
@@ -76,7 +76,7 @@ inline void repo_create_post(const fiy::Request& req) {
     auto visibility = fiy::Locality::INSTANCE;
     for (auto& [k, v]: form) {
         if (k == "repo-owner") {
-            while (v[0] == '@')
+            while (!v.empty() && v[0] == '@')
                 v = v.substr(1);
             const auto at = v.rfind('@');
             if (at == std::string::npos) {
@@ -98,6 +98,11 @@ inline void repo_create_post(const fiy::Request& req) {
         } else {
             fiy::log_info("Repo create: " + req.user_str() + " gave invalid field: " + k);
         }
+    }
+
+    if (repo.name.empty()) {
+        req.respond(400, "", "Repository name is required");
+        return;
     }
 
     // Non-local!!! Needs to be created by peer

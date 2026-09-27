@@ -200,6 +200,8 @@ ssize_t GitRepo::branches_count() {
  */
 std::string GitRepo::default_branch() {
     std::lock_guard lock{m_mtx};
+    if (git_repository_head_unborn(m_repo) == 1)
+        return "";
     git_reference* head = nullptr;
     std::string ret;
     if (ok(git_repository_head(&head, m_repo))) {
@@ -551,6 +553,10 @@ bool GitRepo::get_repo_page_data(const std::string& branch, RepoPageData& data) 
 
     // These expect the mutex to be locked already
     std::lock_guard lock{m_mtx};
+    if (branch.empty() && git_repository_head_unborn(m_repo) == 1) {
+        data.commits_count = 0;
+        return true;
+    }
     git_oid target;
     if (!ok(branch_tip(branch, target), "branch_tip"))
         return false;
@@ -578,7 +584,6 @@ bool GitRepo::get_tree_dto_branch(DTORepoTree& dto, const std::string& branch, c
         return false;
     return true;
 }
-
 bool GitRepo::get_tree_dto_commit(DTORepoTree& dto, const std::string_view& commit, const std::string& path) {
     dto.path = path;
 

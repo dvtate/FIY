@@ -364,9 +364,6 @@ namespace WebUtils {
     //        }
             csubstr = s.data();
             kv.second = WebUtils::uri_decode(csubstr + start, csubstr + i);
-            if (kv.second.empty()) {
-                return false;
-            }
             ret.emplace_back(std::move(kv));
             i++;
         } while (i < s.size());

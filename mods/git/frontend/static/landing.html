@@ -6,6 +6,12 @@
     <link rel="icon" sizes="any" type="image/svg+xml" href="{{fiy_baseuri}}/logo.svg">
     <link rel="alternate icon" type="image/x-icon" href="{{fiy_baseuri}}/favicon.ico">
     <title>Git-IY - Federated Git</title>
+    <meta name="description" content="Federated Git hosting on FIY">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <link rel="stylesheet" href="{{fiy_baseuri}}/main.css">
+    <script src="/portal/theme.js?v=4"></script>
     <style>
         #logo {
             font-size: 10vh;
@@ -23,24 +29,38 @@
     </style>
 </head>
 <body>
-    <header>
-        <span id="logo">Git-IY&nbsp;<img src="{{fiy_baseuri}}/logo.svg" /></span>
-        <h1>Git-IY: Git It Yourself</h1>
-        <a class="button" href="//{{fiy_domain}}/portal">{{fiy_domain}} Portal</a>
-        | <a class="button" href="{{fiy_baseuri}}/repo/new">Create Repo</a>
-        | <a class="button" href="{{profile_url}}">Profile</a>
-        <hr/>
-    </header>
-    <h2>Federated Git Hosting</h2>
-    <p>Giy-IY lets you use a single federated account to collaborate across federated instances while giving you or your
-        organization code ownership and sovereignty. Giy-IY also integrates with other apps on the FIY platform,
-        offering powerful tools for collaboration and community organization.
-    </p>
-
-    <h3>Popular Repositories</h3>
-    <div id="popular-repos">
-        <noscript>JavaScript required to get popular repos list</noscript>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="//{{fiy_domain}}/portal">{{fiy_domain}} Portal</a><a href="{{fiy_baseuri}}">Git-IY</a><a href="{{profile_url}}">Profile</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
     </div>
+  </div>
+</header>
+<main>
+    <div class="page-head">
+        <span id="logo">Git-IY&nbsp;<img src="{{fiy_baseuri}}/logo.svg" alt="Git-IY logo" /></span>
+        <h1>Git-IY: Git It Yourself</h1>
+        <div class="cta-row">
+            <a class="btn btn-primary" href="{{fiy_baseuri}}/repo/new">Create Repo</a>
+            <a class="btn btn-secondary" href="{{profile_url}}">Profile</a>
+        </div>
+    </div>
+    <section>
+        <h2>Federated Git Hosting</h2>
+        <p>Giy-IY lets you use a single federated account to collaborate across federated instances while giving you or your
+            organization code ownership and sovereignty. Giy-IY also integrates with other apps on the FIY platform,
+            offering powerful tools for collaboration and community organization.
+        </p>
+    </section>
+
+    <section>
+        <h3>Popular Repositories</h3>
+        <div id="popular-repos">
+            <noscript>JavaScript required to get popular repos list</noscript>
+        </div>
+    </section>
 
     <script>
         (async () => {
@@ -62,5 +82,7 @@
     </script>
 
     <!-- TODO real-time activity stream -->
+</main>
+<footer>FIY — Federate It Yourself.</footer>
 </body>
 </html>

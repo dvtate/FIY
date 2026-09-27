@@ -1,38 +1,34 @@
+/* Git-IY components on top of /portal/main.css (IBM Plex + red). */
 
-/* Dark mode */
+/* Map legacy component tokens to portal palette. */
 :root {
-    --bg-color: #0d1117;
-    --container-bg: #161b22;
-    --highlight-bg: #242830;
-    --border-color: #30363d;
-    --text-main: #c9d1d9;
-    --text-muted: #8b949e;
-    --accent-blue: #58a6ff;
+    --bg-color: var(--paper, #fdfcfb);
+    --container-bg: var(--panel, #ffffff);
+    --highlight-bg: var(--tint, #fbeae8);
+    --border-color: var(--line, #e6e2df);
+    --text-main: var(--ink, #1c1a19);
+    --text-muted: var(--muted, #6b6560);
+    --accent-blue: var(--red, #d1352b);
 }
 
-/* Light mode */
-@media (prefers-color-scheme: light) {
-    :root {
-        --bg-color: #f3f6fb;
-        --container-bg: #ffffff;
-        --highlight-bg: #bacada;
-        --border-color: #d0d7de;
-        --text-main: #24292f;
-        --text-muted: #57606a;
-        --accent-blue: #0969da;
-    }
+:root[data-theme="dark"] {
+    --bg-color: var(--paper);
+    --container-bg: var(--panel);
+    --highlight-bg: var(--tint);
+    --border-color: var(--line);
+    --text-main: var(--ink);
+    --text-muted: var(--muted);
+    --accent-blue: var(--red);
 }
 
 body {
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-main);
-    margin: 0;
-    padding: 20px;
-    line-height: 1.5;
 }
 
 .container {
-    max-width: 1012px;
+    max-width: 900px;
     margin: 0 auto;
+    padding: 0 0 64px;
 }

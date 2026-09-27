@@ -3,12 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Chat App</title>
+    <title>Chat — FIY</title>
+    <meta name="description" content="Chat on FIY">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <script src="/portal/theme.js?v=4"></script>
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
             display: flex;
+            flex-direction: column;
             height: 100vh;
             overflow: hidden;
         }
@@ -17,26 +25,30 @@
         .app {
             display: flex;
             width: 100%;
-            height: 100%;
+            flex: 1;
+            min-height: 0;
         }
 
         /* Sidebar for chat list */
         .sidebar {
             width: 300px;
-            border-right: 1px solid #ccc;
+            border-right: 1px solid var(--line);
+            background: var(--panel);
             display: flex;
             flex-direction: column;
         }
 
         .search-bar {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--line);
         }
         .search-bar input {
             width: 100%;
-            padding: 8px;
+            padding: 8px 12px;
             border-radius: 20px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--ink);
         }
 
         .chat-list {
@@ -48,11 +60,11 @@
             display: flex;
             align-items: center;
             padding: 10px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--line);
             cursor: pointer;
         }
         .chat-item:hover {
-            background: #f9f9f9;
+            background: var(--tint);
         }
         .chat-item img {
             width: 40px;
@@ -68,11 +80,11 @@
         }
         .chat-details .status {
             font-size: 12px;
-            color: gray;
+            color: var(--muted);
         }
         .chat-notification {
-            background: #e63946;
-            color: white;
+            background: var(--red);
+            color: #fff;
             padding: 4px 8px;
             border-radius: 50%;
             font-size: 12px;
@@ -83,10 +95,12 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            background: var(--paper);
         }
         .chat-header {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
+            padding: 10px 24px;
+            border-bottom: 1px solid var(--line);
+            background: var(--panel);
             display: flex;
             align-items: center;
         }
@@ -98,9 +112,9 @@
         }
         .chat-messages {
             flex: 1;
-            padding: 10px;
+            padding: 10px 24px;
             overflow-y: auto;
-            background: #fafafa;
+            background: var(--paper);
         }
         .message {
             margin: 5px 0;
@@ -108,35 +122,32 @@
             border-radius: 15px;
             max-width: 60%;
             clear: both;
+            border: 1px solid var(--line);
         }
         .message.sent {
-            background: #0078fe;
-            color: white;
+            background: var(--red);
+            border-color: var(--red);
+            color: #fff;
             margin-left: auto;
         }
         .message.received {
-            background: #e4e6eb;
+            background: var(--panel);
             margin-right: auto;
         }
         .chat-input {
             display: flex;
-            border-top: 1px solid #ddd;
-            padding: 10px;
+            border-top: 1px solid var(--line);
+            background: var(--panel);
+            padding: 10px 24px;
         }
         .chat-input input {
             flex: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
             border-radius: 20px;
             margin-right: 10px;
-        }
-        .chat-input button {
-            padding: 8px 16px;
-            border: none;
-            background: #0078fe;
-            color: white;
-            border-radius: 20px;
-            cursor: pointer;
+            background: var(--panel);
+            color: var(--ink);
         }
 
         /* Mobile responsive */
@@ -158,6 +169,15 @@
     </style>
 </head>
 <body>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="/portal">Portal</a><a href="/chat">Chat</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
 <div class="app">
     <div class="sidebar" id="sidebar">
         <div class="search-bar">
@@ -193,8 +213,8 @@
             <div class="message sent">Hi, how are you?</div>
         </div>
         <div class="chat-input">
-            <input type="text" placeholder="Type a message..." id="messageInput">
-            <button onclick="sendMessage()">Send</button>
+            <input type="text" placeholder="Type a message..." id="messageInput" aria-label="Type a message">
+            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
         </div>
     </div>
 </div>

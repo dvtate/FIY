@@ -1,4 +1,32 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline — FIY Social</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
+</head>
+<body>
 <!--
 Show recent posts from users following list in chronological order
 -->
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="/portal">Portal</a><a href="/social">Social</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
+<main>
+<div class="page-head"><h1>Timeline</h1><p>Recent posts from users you follow, in chronological order.</p></div>
+<div class="apps" id="timeline-posts"></div>
+<p class="empty-state" role="status">No posts yet.</p>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
+</body>
+</html>

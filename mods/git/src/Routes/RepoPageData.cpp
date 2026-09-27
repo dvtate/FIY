@@ -37,14 +37,10 @@ std::string RepoFileBrowserPageData::entries_html() const {
         }
         ret += "</span> ";
         ret += e.path;
-        ret += "</td><td class=\"file-commit-msg\"><a href=\"";
-        ret += this->name;
-        ret += "/commit/";
-        ret += e.last_commit.id;
-        ret += "\">";
+        ret += "</td><td class=\"file-commit-msg\">";
         ret += e.last_commit.message.substr(0,
             e.last_commit.message.find('\n'));
-        ret += "</a></td><td class=\"file-time\" title=\"";
+        ret += "</td><td class=\"file-time\" title=\"";
         ret += Pages::time_str(e.last_commit.ts);
         ret +="\">";
         ret += Pages::time_diff_str(now, e.last_commit.ts);
