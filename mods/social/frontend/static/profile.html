@@ -1,6 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — FIY Social</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
+</head>
+<body>
 <!--
 - Get profile info from contacts app
     - link to full profile?
 - Show user's recent posts
-
 -->
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="/portal">Portal</a><a href="/social">Social</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
+<main>
+<div class="page-head"><h1>Profile</h1><p>Profile info comes from the contacts app, with recent posts below.</p></div>
+<div id="profile-info"></div>
+<div class="apps" id="profile-posts"></div>
+<p class="empty-state" role="status">No posts yet.</p>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
+</body>
+</html>

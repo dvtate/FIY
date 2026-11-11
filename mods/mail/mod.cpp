@@ -103,13 +103,36 @@ static void send_mail(const fiy::Request& req) {
 }
 
 static const std::string& header_links() {
-    static const std::string head = "<nav>"
-        "<a href='" + fiy::host().host_base_uri() + "/portal'>" + fiy::host().domain + "</a>"
-        " | <a href='" + fiy::host().base_uri + "/inbox'>Inbox</a>"
-        " | <a href='" + fiy::host().base_uri + "/outbox'>Outbox</a>"
-        " | <a href='" + fiy::host().base_uri + "/compose'>Compose</a>"
-        "<hr/></nav>";
+    static const std::string head =
+        "<header><div class=\"bar\">"
+        "<a class=\"wordmark\" href=\"/\">FIY<span>.</span></a>"
+        "<div class=\"bar-right\">"
+        "<nav aria-label=\"Main navigation\">"
+        "<a href='" + fiy::host().host_base_uri() + "/portal'>Portal</a>"
+        " <a href='" + fiy::host().base_uri + "/inbox'>Inbox</a>"
+        " <a href='" + fiy::host().base_uri + "/outbox'>Outbox</a>"
+        " <a href='" + fiy::host().base_uri + "/compose'>Compose</a>"
+        "</nav>"
+        "<button class=\"icon-btn\" id=\"theme-toggle\" type=\"button\" aria-label=\"Switch theme\">\u263e</button>"
+        "</div></div></header>";
     return head;
+}
+
+static std::string mail_page_head(const std::string& title) {
+    return "<!DOCTYPE html><html lang=\"en\"><head>"
+        "<meta charset=\"UTF-8\">"
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+        "<title>" + title + " &mdash; FIY Mail</title>"
+        "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+        "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+        "<link rel=\"stylesheet\" href=\"/portal/main.css?v=4\">"
+        "<script src=\"/portal/theme.js?v=4\"></script>"
+        "</head><body>"
+        + header_links() + "<main>";
+}
+
+static std::string mail_page_foot() {
+    return "</main><footer>FIY &mdash; Federate It Yourself.</footer></body></html>";
 }
 
 
@@ -134,16 +157,23 @@ static void handle_request(const fiy_request_t* request) {
         send_mail(req);
         return;
     } else if (strcmp(req.path, "/") == 0) {
-        static const std::string html = header_links() + "<h1>Welcome to Mail!</h1>"
+        static const std::string html = mail_page_head("Mail")
+            + "<div class=\"page-head\"><h1>Welcome to Mail!</h1>"
             "<p>This demo mod is used to test federation protocol while providing basic communication functionality."
             " Messages are stored in server memory and thus may disappear without notice."
-            "</p>";
+            "</p>"
+            "<div class=\"cta-row\"><a class=\"btn btn-primary\" href='" + fiy::host().base_uri + "/compose'>Compose</a>"
+            "<a class=\"btn btn-secondary\" href='" + fiy::host().base_uri + "/inbox'>Inbox</a></div></div>"
+            + mail_page_foot();
         req.respond( 200, "Content-Type: text/html", fiy::Body(html));
         return;
     } else if (strcmp(req.path, "/inbox") == 0) {
         // Authenticated local user
         if (req.domain == nullptr && req.user != nullptr) {
-            const auto inbox = header_links() + g_mailbox.get_inbox_str(req.global_user_str());
+            const auto inbox = mail_page_head("Inbox")
+                + "<div class=\"page-head\"><h1>Inbox</h1></div>"
+                + g_mailbox.get_inbox_str(req.global_user_str())
+                + mail_page_foot();
             req.respond( 200, "Content-Type: text/html", fiy::Body(inbox));
             return;
         }
@@ -153,7 +183,10 @@ static void handle_request(const fiy_request_t* request) {
         return;
     } else if (strcmp(req.path, "/outbox") == 0) {
         if (req.domain == nullptr && req.user != nullptr) {
-            const auto outbox = header_links() + g_mailbox.get_outbox_str(req.global_user_str());
+            const auto outbox = mail_page_head("Outbox")
+                + "<div class=\"page-head\"><h1>Outbox</h1></div>"
+                + g_mailbox.get_outbox_str(req.global_user_str())
+                + mail_page_foot();
             req.respond( 200, "Content-Type: text/html", fiy::Body(outbox));
             return;
         }
@@ -163,14 +196,13 @@ static void handle_request(const fiy_request_t* request) {
         return;
 
     } else if (strcmp(req.path, "/compose") == 0) {
-        std::string compose_html =
-            "<!doctype html><html><body>\n"
-            + header_links() +
+        std::string compose_html = mail_page_head("Compose")
+           + "<div class=\"page-head\"><h1>Compose</h1></div>\n"
            "<form action='javascript:submit()'>\n"
-           "To: <input type='text' id='inp-to' placeholder='tate@dvtt.net,test@example.com,jerry' />\n"
-           "<br/>Subject: <input type='text' id='inp-subject' placeholder='Important message' />\n"
-           "<br/>Body: <textarea id='inp-body'>Write your email here</textarea>\n"
-           "<br/><button type='submit'>Send</button>\n"
+           "<div class='field'><label for='inp-to'>To</label><input type='text' id='inp-to' placeholder='tate@dvtt.net,test@example.com,jerry' /></div>\n"
+           "<div class='field'><label for='inp-subject'>Subject</label><input type='text' id='inp-subject' placeholder='Important message' /></div>\n"
+           "<div class='field'><label for='inp-body'>Body</label><textarea id='inp-body' rows='8'>Write your email here</textarea></div>\n"
+           "<button class='btn btn-primary' type='submit'>Send</button>\n"
            "</form>\n"
            "<script>\n"
            "async function submit() {\n"
@@ -183,7 +215,7 @@ static void handle_request(const fiy_request_t* request) {
            "    .catch(console.error);\n"
            "}\n"
            "</script>\n"
-           "</body></html>";
+           + mail_page_foot();
         req.respond( 200, "Content-Type: text/html", compose_html);
         return;
     } else if (strncmp(req.path, "/view/", strlen("/view/")) == 0) {
@@ -194,7 +226,10 @@ static void handle_request(const fiy_request_t* request) {
             req.respond( 404, "Not found");
             return;
         }
-        const auto body_str = header_links() + m.long_view();
+        const auto body_str = mail_page_head(m.m_subject)
+            + "<div class=\"page-head\"><h1>" + m.m_subject + "</h1></div>"
+            + m.long_view()
+            + mail_page_foot();
         req.respond( 200, "Content-Type: text/html", fiy::Body(body_str));
         return;
     }

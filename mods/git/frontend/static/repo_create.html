@@ -1,63 +1,68 @@
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <title>Create Repository | Git-IY</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" sizes="any" type="image/svg+xml" href="{{fiy_baseuri}}/logo.svg">
     <link rel="alternate icon" type="image/x-icon" href="{{fiy_baseuri}}/favicon.ico">
-    <style>
-        label {
-            font-weight: bold;
-        }
-        div.input-group {
-            border: 1px solid black;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-    </style>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <script src="/portal/theme.js?v=4"></script>
 </head>
 <body>
-    <h1>Create a New Repository</h1>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="//{{fiy_domain}}/portal">Portal</a><a href="{{fiy_baseuri}}">Git-IY</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
+<main class="settings">
+    <a href="{{fiy_baseuri}}">Back to Git-IY</a>
+    <div class="page-head"><h1>Create a New Repository</h1></div>
     <form method="post">
-        <div class="input-group">
-            <label for="repo-url">URL</label>
-            <div id="repo-url">
-<!--                <select title="Git-IY Instance" id="repo-instance">-->
-<!--                    <option value="fiy.to">fiy.to</option>-->
-<!--                </select>-->
-<!--                /git/-->
-                <select title="Owner" id="repo-owner" name="repo-owner">
-                    <option value="{{fiy_user}}" selected>{{fiy_user}}</option>
-                    {{user_orgs_option_list}}
-                </select> /
-                <input type="text" id="repo-name" name="repo-name" placeholder="team-website" />
+        <fieldset>
+            <legend>URL</legend>
+            <div class="field">
+                <label for="repo-owner">Owner</label>
+                <div id="repo-url">
+                    <select title="Owner" id="repo-owner" name="repo-owner">
+                        <option value="{{fiy_user}}" selected>{{fiy_user}}</option>
+                        {{orgs_option_list}}
+                    </select>
+                    <span> / </span>
+                    <input type="text" id="repo-name" name="repo-name" placeholder="team-website" required />
+                </div>
             </div>
-        </div>
+        </fieldset>
 
-        <div class="input-group">
-            <label for="repo-description">Description</label>
-            <input type="text" id="repo-description" name="repo-description" />
-        </div>
+        <fieldset>
+            <legend>Description</legend>
+            <div class="field">
+                <label for="repo-description">Description</label>
+                <input type="text" id="repo-description" name="repo-description" />
+            </div>
+        </fieldset>
 
-        <div class="input-group">
-            <label for="repo-visibility">
-                Visibility
-                <p>By default, who can view this repository? You can add collaborators later.</p>
-            </label>
-            <select id="repo-visibility" name="repo-visibility">
-                <option value="0">Private - Only you</option>
-                <option value="1">Local - Only users on my instance</option>
-                <option value="2">Federated - Only other Git-IY users</option>
-                <option value="3">Global - Anyone on the internet</option>
-            </select>
-        </div>
-        <button type="submit">Create Repository</button>
+        <fieldset>
+            <legend>Visibility</legend>
+            <div class="field">
+                <label for="repo-visibility">By default, who can view this repository? You can add collaborators later.</label>
+                <select id="repo-visibility" name="repo-visibility">
+                    <option value="0">Private - Only you</option>
+                    <option value="1">Local - Only users on my instance</option>
+                    <option value="2">Federated - Only other Git-IY users</option>
+                    <option value="3">Global - Anyone on the internet</option>
+                </select>
+            </div>
+        </fieldset>
+        <button class="btn btn-primary" type="submit">Create Repository</button>
     </form>
-    <script>
-
-    </script>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
 </body>
 </html>

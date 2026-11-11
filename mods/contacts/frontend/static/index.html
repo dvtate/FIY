@@ -3,43 +3,63 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Contacts Page</title>
+    <title>Contacts — FIY</title>
+    <meta name="description" content="Manage your contacts on FIY">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/portal/main.css?v=4">
     <link rel="stylesheet" href="{{fiy_contacts_base_uri}}/main.css" />
+    <script src="/portal/theme.js?v=4"></script>
 
     <!-- TODO locally host this instead -->
     <link rel="stylesheet" href="{{fiy_contacts_base_uri}}/fa/fa.css" />
     <link rel="icon" href="{{fiy_contacts_base_uri}}/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <nav class="navbar">
-        <a class="nav-icon" href="//{{fiy_contacts_domain}}/portal" title="Apps"><i class="fa fa-th"></i></a>
-        <a class="nav-icon" href="javascript:newContact()" title="Add Contact"><i class="fa fa-plus"></i></a>
-        <a class="nav-icon" href="javascript:showContactDetails(profileIndex)" title="Profile"><i class="fa fa-user"></i></a>
-        <a class="nav-icon" href="javascript:uploadContact()" title="Upload"><i class="fa fa-upload"></i></a>
-        <a class="nav-icon" href="{{fiy_contacts_base_uri}}/all" title="Download"><i class="fa fa-download"></i></a>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="//{{fiy_contacts_domain}}/portal">Portal</a><a href="{{fiy_contacts_base_uri}}">Contacts</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
+<main class="contacts-main">
+    <div class="page-head"><h1>Contacts</h1></div>
+    <nav class="navbar contacts-toolbar" aria-label="Contacts actions">
+        <a class="btn btn-secondary nav-icon" href="//{{fiy_contacts_domain}}/portal" title="Apps"><i class="fa fa-th"></i> Apps</a>
+        <a class="btn btn-secondary nav-icon" href="javascript:newContact()" title="Add Contact"><i class="fa fa-plus"></i> New</a>
+        <a class="btn btn-secondary nav-icon" href="javascript:showContactDetails(profileIndex)" title="Profile"><i class="fa fa-user"></i> Profile</a>
+        <a class="btn btn-secondary nav-icon" href="javascript:uploadContact()" title="Upload"><i class="fa fa-upload"></i> Upload</a>
+        <a class="btn btn-secondary nav-icon" href="{{fiy_contacts_base_uri}}/all" title="Download"><i class="fa fa-download"></i> Download</a>
 <!--        <a class="nav-icon" title="Notifications"><i class="fa fa-bell"></i></a>-->
 <!--        <a class="nav-icon" title="Settings"><i class="fa fa-cog"></i></a>-->
     </nav>
     <div class="container">
         <div class="sidebar">
-            <input type="search" id="search" placeholder="Search contacts..." />
+            <div class="search"><input type="search" id="search" placeholder="Search contacts..." aria-label="Search contacts" /></div>
             <ul id="contact-list">
                 Loading contacts...
                 <noscript>This app uses JavaScript. Send a PR if that's a problem.</noscript>
             </ul>
         </div>
         <div class="details-view">
-            <button class="back-button" onclick="mobileDetailsView(true)"><i class="fa fa-arrow-left"> </i> Back</button>
+            <button class="btn btn-secondary back-button" onclick="mobileDetailsView(true)"><i class="fa fa-arrow-left"> </i> Back</button>
             <div id="contact-details">
                 <p>Select a contact to view details</p>
-                <hr/>
-                <button><i class="fa fa-user"></i> Edit my profile</button>&nbsp;
-                <button><i class="fa fa-plus"></i> Make a new contact</button>
+                <hr class="rule"/>
+                <div class="cta-row">
+                    <button class="btn btn-secondary"><i class="fa fa-user"></i> Edit my profile</button>
+                    <button class="btn btn-primary"><i class="fa fa-plus"></i> Make a new contact</button>
+                </div>
             </div>
         </div>
         <input type="file" id="contact-upload" accept="text/vcard" hidden />
     </div>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
     <script src="{{fiy_contacts_base_uri}}/main.js"></script>
 </body>
 </html>

@@ -1,4 +1,16 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" sizes="any" type="image/svg+xml" href="{{fiy_baseuri}}/logo.svg">
+    <title>User Settings | Git-IY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <script src="/portal/theme.js?v=4"></script>
+</head>
+<body>
 <!--
 Settings:
 - convert this user to/from organization
@@ -10,3 +22,29 @@ Settings:
 
 ... really not much to put here
 -->
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="//{{fiy_domain}}/portal">Portal</a><a href="{{fiy_baseuri}}">Git-IY</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
+<main class="settings">
+<a href="{{fiy_baseuri}}">Back to Git-IY</a>
+<div class="page-head"><h1>User Settings</h1></div>
+<fieldset>
+    <legend>Organization</legend>
+    <p>Convert this user to/from an organization.</p>
+    <button class="btn btn-primary" type="button">Convert</button>
+</fieldset>
+<fieldset>
+    <legend>Membership</legend>
+    <p>Manage organization membership and emails.</p>
+    <button class="btn btn-secondary" type="button">Manage</button>
+</fieldset>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
+</body>
+</html>

@@ -6,51 +6,57 @@
     <link rel="icon" sizes="any" type="image/svg+xml" href="{{fiy_baseuri}}/logo.svg">
     <link rel="alternate icon" type="image/x-icon" href="{{fiy_baseuri}}/favicon.ico">
     <title>{{fiy_user}} - Git-IY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <link rel="stylesheet" href="{{fiy_baseuri}}/main.css">
+    <script src="/portal/theme.js?v=4"></script>
     <style>
-        .repo-likes {
-            border: 1px solid grey;
-            /*padding: 2px;*/
-            border-radius: 3px;
-            margin-right: 3px;
-        }
+        #user-pfp { width: 64px; height: 64px; border-radius: 14px; object-fit: cover; }
         .repo-card {
-            padding: 5px;
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 22px; border: 1px solid var(--line, #e6e2df); border-radius: 8px;
+            background: var(--panel, #fff); margin-bottom: 16px;
         }
+        .repo-likes { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--muted, #6b6560); white-space: nowrap; }
+        .profile-tabs { display: flex; gap: 24px; font-size: 15px; font-weight: 500; margin: 18px 0; }
     </style>
 </head>
 <body>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="//{{fiy_domain}}/portal">Portal</a><a href="{{fiy_baseuri}}">Git-IY</a><a href="{{fiy_baseuri}}/{{request_user}}">Profile</a><a href="{{fiy_baseuri}}/repo/new">New Repo</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
 
-<nav>
-    <a href="//{{fiy_domain}}/portal">Portal</a>
-    | <a href="{{fiy_baseuri}}">Git-IY</a>
-    | <a href="{{fiy_baseuri}}/{{request_user}}">Profile</a>
-    | <a href="{{fiy_baseuri}}/repo/new">New Repo</a>
-    <hr/>
-</nav>
-
-<div class="container">
+<main>
     <noscript>
         <h1>This page requires JavaScript. :(</h1>
     </noscript>
+    <div class="page-head">
+        <div id="user-basic-info">
+            <img id="user-pfp" src="//{{fiy_domain}}/mods/contacts/pfp/{{fiy_user}}" alt="profile image" />
+            <h1 id="user-dn">{{fiy_display_name}}</h1>
+            <p id="user-fiy">{{fiy_user}}</p>
+            <p id="user-bio">{{fiy_user_bio}}</p>
+            <!-- no followers/following for now -->
+            <!-- todo get more info from contacts mod -->
+        </div>
+    </div>
     <div class="profile-tabs">
         <a href="?tab=repos">Repositories</a>
-        | <a href="?tab=activity">Activity</a>
-        | <a href="?tab=likes">Likes</a>
-    </div>
-
-    <!-- this should get ssr'd -->
-    <div id="user-basic-info">
-        <img id="user-pfp" src="//{{fiy_domain}}/mods/contacts/pfp/{{fiy_user}}"  alt="profile image" />
-        <h2 id="user-dn">{{fiy_display_name}}</h2>
-        <h4 id="user-fiy">{{fiy_user}}</h4>
-        <p id="user-bio">{{fiy_user_bio}}</p>
-        <!-- no followers/following for now -->
-        <!-- todo get more info from contacts mod -->
+        <a href="?tab=activity">Activity</a>
+        <a href="?tab=likes">Likes</a>
     </div>
 
     <div id="tab-view">
     </div>
-</div>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
     <script>
         const domain = "{{fiy_domain}}";
         const baseUrl = "{{fiy_baseuri}}";

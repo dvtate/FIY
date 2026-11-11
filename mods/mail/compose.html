@@ -1,9 +1,31 @@
-<!doctype html><html><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compose — FIY Mail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="/portal">Portal</a><a href="inbox">Inbox</a><a href="outbox">Outbox</a><a href="compose">Compose</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
+<main>
+<div class="page-head"><h1>Compose</h1></div>
 <form action='javascript:submit()'>
-    To: <input type='text' id='inp-to' placeholder='tate@dvtt.net,test@example.com,jerry' />
-    <br/>Subject: <input type='text' id='inp-subject' placeholder='Important message' />
-    <br/>Body: <textarea id='inp-body'>Write your email here</textarea>
-    <br/><button type='submit'>Send</button>
+    <div class='field'><label for='inp-to'>To</label><input type='text' id='inp-to' placeholder='tate@dvtt.net,test@example.com,jerry' /></div>
+    <div class='field'><label for='inp-subject'>Subject</label><input type='text' id='inp-subject' placeholder='Important message' /></div>
+    <div class='field'><label for='inp-body'>Body</label><textarea id='inp-body' rows='8'>Write your email here</textarea></div>
+    <button class='btn btn-primary' type='submit'>Send</button>
 </form>
 <script>
     async function submit() {
@@ -16,5 +38,8 @@
         .catch(console.error);
     }
 </script>
-</body></html>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
+</body>
+</html>
 <!-- This file must manually be inserted into mod.cpp -->

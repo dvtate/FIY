@@ -1,3 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — FIY OAuth</title>
+<meta name="description" content="Log into a FIY instance with OAuth">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
+</head>
+<body>
 <!--
 Key parts:
 - "Log into <instance domain>"
@@ -6,5 +19,69 @@ Key parts:
 - otherwise
 - modify page, showing user's pfp and name
 - show user's pfp (available at: //<instance>/mods/contacts/pfp/<username>)
--
 -->
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="/portal">Portal</a><a href="/portal/login">Log In</a><a href="/portal/signup">Sign Up</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="login">
+    <h1>Log into <span id="instance-domain">{{domain}}</span></h1>
+    <form id="oauth-username-form" method="get">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="janedoe or janedoe@example.com" required autocomplete="username">
+        <span class="hint" id="username-hint">Enter your FIY username. Federated usernames redirect to their home instance.</span>
+      </div>
+      <p class="error-msg" id="oauth-error" role="alert"></p>
+      <button class="btn btn-primary" type="submit">Continue</button>
+    </form>
+    <div id="oauth-profile" hidden>
+      <img id="oauth-pfp" src="" alt="profile image" width="64" height="64">
+      <p id="oauth-name"></p>
+      <form method="post">
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary" type="submit">Log In</button>
+      </form>
+    </div>
+    <hr class="rule">
+    <div class="links">
+      <a href="/portal/signup">Create an account</a>
+      <a href="/">About FIY</a>
+    </div>
+  </div>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
+<script>
+(function() {
+  const instanceDomain = window.location.hostname;
+  document.getElementById('instance-domain').textContent = instanceDomain;
+  document.getElementById('oauth-username-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const err = document.getElementById('oauth-error');
+    if (!username) { err.textContent = 'Enter a username.'; return; }
+    err.textContent = '';
+    const at = username.lastIndexOf('@');
+    if (at !== -1 && !username.endsWith('@' + instanceDomain) && username.slice(at + 1) !== instanceDomain) {
+      const foreign = username.slice(at + 1);
+      window.location = '//' + foreign + '/mods/oauth/login?username=' + encodeURIComponent(username);
+      return;
+    }
+    const bare = at === -1 ? username : username.slice(0, at);
+    document.getElementById('oauth-pfp').src = '//' + instanceDomain + '/mods/contacts/pfp/' + encodeURIComponent(bare);
+    document.getElementById('oauth-name').textContent = bare;
+    document.getElementById('oauth-profile').hidden = false;
+  });
+})();
+</script>
+</body>
+</html>

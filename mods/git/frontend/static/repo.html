@@ -1,337 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{repo_owner}}/{{repo_name}}: {{repo_description}}</title>
+    <title>{{repo_owner}}/{{repo_name}} | Git-IY</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" sizes="any" type="image/svg+xml" href="{{fiy_baseuri}}/logo.svg">
     <link rel="alternate icon" type="image/x-icon" href="{{fiy_baseuri}}/favicon.ico">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" />
-    <link rel="stylesheet" href="{{mod_baseurl}}/main.css" />
+    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <link rel="stylesheet" href="{{mod_baseurl}}/main.css">
+    <script src="/portal/theme.js?v=4"></script>
     <style>
-
-        a {
-            text-decoration: none;
+        .repo-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 36px 0 24px;
+            border-bottom: 1px solid var(--line);
         }
-        a:hover {
-            color: var(--accent-blue);
-            text-decoration: underline;
+        .repo-avatar {
+            width: 40px;
+            height: 40px;
+            flex: none;
+            border-radius: 50%;
+            object-fit: cover;
         }
-
-        #repo-title-area a {
-            color: var(--text-main);
-            text-decoration: none;
+        .repo-heading-copy { min-width: 0; flex: 1; }
+        .repo-path {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 24px;
+            line-height: 1.35;
         }
-        #repo-title-area a:hover {
-            color: var(--accent-blue);
+        .repo-path a { color: var(--ink); text-decoration: none; }
+        .repo-path a:hover { color: var(--red); }
+        .repo-path .repo-name { font-weight: 700; }
+        .repo-path .separator { color: var(--muted); }
+        .repo-description { margin: 8px 0 0; color: var(--muted); }
+        .repo-description:empty { display: none; }
+        .repo-visibility {
+            flex: none;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px 10px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
         }
-
-        #repo-name {
-            font-weight: bold;
-        }
-
-        #repo-owner-pfp {
-            height: 1.75rem;
-            vertical-align: middle;
-            border-radius: 1rem;
-        }
-
-        #repo-visibility {
-            border: 1px solid var(--border-color);
-            padding: 2px 8px 0 8px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-        .repo-description {
-            color: var(--text-muted);
-        }
-
-        .button {
-            border: 1px solid var(--border-color);
-            padding: 2px 8px 0 8px;
-            border-radius: 20px;
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-        .button:hover {
-            color: var(--accent-blue);
+        .repo-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 20px 0;
         }
         .repo-stats {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 10px;
+            gap: 8px 20px;
+            color: var(--muted);
+            font-size: 14px;
         }
-        .repo-stats > * {
-            white-space: nowrap;
-            margin: 2px;
-        }
-
-        .desktop-labels {
-            display: none;
-        }
-        @media (min-width: 700px) {
-            .desktop-labels {
-                display: inline-block;
-            }
-        }
-
-        .combo-button {
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 2px 8px 0 8px;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-        .combo-button > * {
-            padding: 0px 8px;
-            cursor: pointer;
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-        .combo-button > *:first-child {
-            /*background-color: var(--bg-color);*/
-            padding-left: 2px;
-            border-right: 1px solid var(--border-color);
-        }
-        .combo-button > *:hover {
-            color: var(--accent-blue);
-            background-color: var(--highlight-bg);
-        }
-
-
-
-
-        .repo-files {
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: var(--container-bg);
-            overflow-x: scroll;
-        }
-
-        #last-commit-banner {
-            background-color: var(--highlight-bg);
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-        }
-        #last-commit-author-pfp {
-            height: 1.2rem;
-            border-radius: 1rem;
-            vertical-align: middle;
-        }
-        #last-commit-banner > * {
-            display: inline-block;
-        }
-        #last-commit-author {
-            font-weight: 600;
-        }
-        #last-commit-author > a {
-            color: var(--text-main);
-        }
-        #last-commit-msg {
-            color: var(--text-muted);
-        }
-        .commit-meta {
-            color: var(--text-muted);
-        }
-        .commit-meta > a {
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-        .commit-meta > a:hover {
-            color: var(--accent-blue);
-            text-decoration: underline;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        tr { border-bottom: 1px solid var(--border-color); }
-        tr:last-child { border-bottom: none; }
-        tr:hover { background-color: var(--highlight-bg); }
-        td {
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-        .file-name {
-            color: var(--text-main);
-            text-decoration: none;
-        }
-        table a {
-            text-decoration: none;
-            color: var(--text-muted);
-        }
-        td.file-name a {
-            color: var(--text-main);
-        }
-        .commit-msg {
-            text-overflow: ellipsis;
-        }
-        .file-time {
-            text-align: right;
-        }
-
-        #clone-instructions {
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            margin: 0 10%;
-            padding: 20px;
-            max-width: 75%;
+        .repo-stats strong { color: var(--ink); font-weight: 600; }
+        .clone-details { position: relative; }
+        .clone-details summary { list-style: none; cursor: pointer; }
+        .clone-details summary::-webkit-details-marker { display: none; }
+        .clone-content {
             position: absolute;
-            background-color: var(--container-bg);
+            z-index: 1;
+            right: 0;
+            top: calc(100% + 8px);
+            width: min(460px, calc(100vw - 48px));
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, .12);
         }
-        pre#clone-url {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            overflow-x: scroll;
-            scrollbar-width: thin;
+        .clone-content p { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+        .clone-content code {
+            display: block;
+            overflow-x: auto;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            color: var(--ink);
+            background: var(--paper);
+            font-size: 13px;
+            white-space: nowrap;
+            user-select: all;
         }
-        #clone-title {
-            font-weight: bold;
-            color: var(--text-main);
+        .repo-panel {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
         }
-
-
+        .repo-empty { padding: 48px 24px; text-align: center; }
+        .repo-empty h1 { font-size: 24px; margin: 0 0 8px; }
+        .repo-empty p { margin: 0; color: var(--muted); }
+        .last-commit {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+            background: var(--tint);
+            font-size: 14px;
+        }
+        .last-commit-message { font-weight: 600; }
+        .commit-meta { color: var(--muted); font-size: 13px; }
+        .repo-files { width: 100%; border-collapse: collapse; }
+        .repo-files tr + tr { border-top: 1px solid var(--line); }
+        .repo-files td { padding: 12px 16px; font-size: 14px; }
+        .repo-files .file-name { font-weight: 600; }
+        .repo-files .file-commit-msg { color: var(--muted); }
+        .repo-files .file-time { color: var(--muted); text-align: right; white-space: nowrap; }
+        @media (max-width: 560px) {
+            .repo-heading { padding-top: 24px; flex-wrap: wrap; }
+            .repo-visibility { margin-left: 54px; }
+            .repo-toolbar { align-items: flex-start; }
+            .clone-details, .clone-details summary { width: 100%; text-align: center; }
+            .clone-content { left: 0; right: auto; }
+            .repo-files .file-commit-msg, .repo-files .file-time { display: none; }
+        }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="//{{fiy_domain}}">Portal</a>
-        | <a href="{{mod_baseurl}}">Git-IY</a>
-        | <a href="{{mod_baseurl}}/{{request_user}}">Profile</a>
-        <hr/>
-    </nav>
-
-    <div class="container">
-
-        <!-- [pfp] user / repo [visibility] -->
-        <header id="repo-title-area">
-            <a id="repo-owner" href="{{mod_baseurl}}/{{repo_owner}}" >
-<!--                <img id="repo-owner-pfp" src="//{{fiy_instance}}/mods/contacts/pfp/{{repo_owner}}" alt="{{repo_owner}}" />-->
-                <img id="repo-owner-pfp" src="{{repo_owner_pfp}}" alt="{{repo_owner}}" />
-                {{repo_owner}}
-            </a>
-            /
-            <a href="{{mod_baseurl}}/{{repo_owner}}/{{repo_name}}" id="repo-name">
-                {{repo_name}}
-            </a>
-            <span id="repo-visibility">{{repo_visibility}}</span>
-            <br/>
-<!--            <span id="repo-tags">{{repo_tags_html}}</span>-->
-            <p class="repo-description">{{repo_description}}</p>
-        </header>
-
-        <!-- Repo stats and links -->
-        <section class="repo-stats">
-
-            <a href="{{repo_name}}/tickets" class="button" title="view tickets: issues and pull requests">
-                <i class="fa fa-exchange-alt"></i> {{repo_tickets_count}}
-                <span class="desktop-labels">Tickets</span>
-            </a>
-            <span class="combo-button">
-                <a href="{{repo_name}}/like" title="Like this repo"><i class="fa fa-heart"></i> Like</a>
-                <a href="{{repo_name}}/likes" title="View repo likes"> {{repo_likes_count}}</a>
-            </span>
-            <span class="combo-button">
-                <a href="{{repo_name}}/fork" title="Fork this repo"><i class="fa fa-code-branch"></i> Fork</a>
-                <a href="{{repo_name}}/forks" title="View forks"> {{repo_forks_count}}</a>
-            </span>
-            <!-- only show if the user owns this repo -->
-            <a href="settings" class="button" title="check the settings for this repo">
-                <i class="fa fa-cog"></i> Settings
-            </a>
-
-            <!-- idk if it's worth implementing this feature
-            <a href="insights" class="button"> <i class="fa fa-chart-line"></i></a>
-            -->
-        </section>
-
-        <section class="repo-stats">
-            <a href="{{repo_name}}/refs" class="button">
-                {{repo_branch}} <i class="fa fa-caret-down"></i>
-            </a>
-            <a href="{{repo_name}}/refs" class="button" title="view branches and tags">
-                <span title="branches"><i class="fa fa-code-branch" title="branches"></i>
-                    {{repo_branches_count}} <span class="desktop-labels">Branches</span>
-                </span>
-                <span title="{{repo_name}}/tags"><i class="fa fa-tags" title="tags"></i>
-                    {{repo_tags_count}} <span class="desktop-labels">Tags</span>
-                </span>
-            </a>
-            <a href="{{repo_name}}/commits" class="button" title="view commit history">
-                <i class="fa fa-history"></i> {{repo_commits_count}}
-                <span class="desktop-labels">Commits</span>
-            </a>
-            <span class="button" id="code-download-button">
-                <i class="fa fa-download"></i> Code
-            </span>
-        </section>
-        <section id="clone-instructions" hidden>
-            <span id="clone-title"><i class="fa fa-terminal"></i> Clone</span>
-            <pre id="clone-url">{{mod_baseurl}}/{{repo_owner}}/{{repo_name}}</pre>
-            <p>Clone the repo using the web url</p>
-            <button id="copy-clone-url"><i class="fa fa-copy"></i> Copy</button>
-            <button id="clone-instructions-close">Close</button>
-        </section>
-
-        <section class="repo-files">
-            <noscript>
-                JavaScript is required to view project overview
-            </noscript>
-            <div id="last-commit-banner">
-                <!-- FIXME this doesn't make sense for empty repos -->
-                <div id="last-commit-summary">
-                    <img id="last-commit-author-pfp" src="{{last_commit_author_pfp}}" />
-                    <span id="last-commit-author"><a href="#">{{last_commit_author}}</a></span>
-                    <a href="{{repo_name}}/commit/{{last_commit_id}}" id="last-commit-msg">{{last_commit_msg}}</a>
-                </div>
-                <div class="commit-meta">
-                    <a href="{{repo_name}}/commit/{{last_commit_id}}">{{last_commit_id}}</a>
-                    ·
-                    <span id="last-commit-time" title="{{last_commit_time}}">{{last_commit_time_diff}}</span>
-                </div>
-            </div>
-            <table>
-                <tbody>
-                {{repo_entries_html}}
-                <!--<tr>
-                    <td class="file-name"><span class="file-icon">📁</span>
-                        <a href="#">docs</a></td>
-                    <td class="file-commit-msg"><a href="commit/{{id}}">Update API documentation</a></td>
-                    <td class="file-time" title="2026-3-3 10:57 AM UTC">2 hours ago</td>
-                </tr>
-                <tr>
-                    <td class="file-name"><span class="file-icon">📄</span>
-                        <a href="#">.gitignore</a></td>
-                    <td class="file-commit-msg"><a href="commit/{{id}}">Initial commit</a></td>
-                    <td class="file-time" title="2026-3-3 10:57 AM UTC">1 year ago</td>
-                </tr>-->
-
-                </tbody>
-            </table>
-        </section>
-
-        <section id="repo-readme">
-<!--            {{repo_readme_html}}-->
-        </section>
-
+<header>
+    <div class="bar">
+        <a class="wordmark" href="/">FIY<span>.</span></a>
+        <div class="bar-right">
+            <nav aria-label="Main navigation">
+                <a href="//{{fiy_domain}}/portal">Portal</a>
+                <a href="{{mod_baseurl}}">Git-IY</a>
+                {{profile_link}}
+            </nav>
+            <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+        </div>
     </div>
+</header>
+<main>
+    <div class="container">
+        <div class="repo-heading">
+            <img class="repo-avatar" src="{{repo_owner_pfp}}" alt="">
+            <div class="repo-heading-copy">
+                <div class="repo-path">
+                    <a href="{{mod_baseurl}}/{{repo_owner}}">{{repo_owner}}</a>
+                    <span class="separator">/</span>
+                    <a class="repo-name" href="{{mod_baseurl}}/{{repo_owner}}/{{repo_name}}">{{repo_name}}</a>
+                </div>
+                <p class="repo-description">{{repo_description}}</p>
+            </div>
+            <span class="repo-visibility">{{repo_visibility}}</span>
+        </div>
 
-    <script>
-        const cloneInstrs = document.getElementById('clone-instructions');
-        document.getElementById('code-download-button').onclick =
-        document.getElementById('clone-instructions-close').onclick = () => cloneInstrs.hidden = !cloneInstrs.hidden;
-        document.getElementById('copy-clone-url').onclick = () =>
-            navigator.clipboard.writeText(
-                document.getElementById('clone-url').innerHTML
-            ).catch(e => console.error('Failed to copy text', e));
-    </script>
+        <div class="repo-toolbar">
+            <div class="repo-stats" aria-label="Repository statistics">
+                <span><strong>{{repo_branches_count}}</strong> Branches</span>
+                <span><strong>{{repo_tags_count}}</strong> Tags</span>
+                <span><strong>{{repo_commits_count}}</strong> Commits</span>
+            </div>
+            <details class="clone-details">
+                <summary class="btn btn-secondary">Clone repository</summary>
+                <div class="clone-content">
+                    <p>Clone URL</p>
+                    <code>{{repo_clone_url}}</code>
+                </div>
+            </details>
+        </div>
+
+        <section class="repo-panel repo-empty" {{repo_empty_hidden}}>
+            <h1>This repository is empty</h1>
+            <p>Push a first commit to see files and history here.</p>
+        </section>
+        <section class="repo-panel" {{repo_files_hidden}}>
+            <div class="last-commit">
+                <span><span class="last-commit-message">{{last_commit_msg}}</span> by {{last_commit_author}}</span>
+                <span class="commit-meta" title="{{last_commit_time}}">{{last_commit_id_short}} · {{last_commit_time_diff}}</span>
+            </div>
+            <table class="repo-files"><tbody>{{repo_entries_html}}</tbody></table>
+        </section>
+    </div>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
 </body>
 </html>

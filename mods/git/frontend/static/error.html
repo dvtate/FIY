@@ -4,30 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Git-IY - Error</title>
-    <style>
-        #logo {
-            font-size: 5em;
-        }
-        #logo > img {
-            display: inline-block;
-            height: 5em;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <script src="/portal/theme.js?v=4"></script>
 </head>
 <body>
 <header>
-    <span id="logo">Git-IY&nbsp;<img src="{{fiy_baseuri}}/logo.svg" /></span>
-    <h1>That didn't work!</h1>
-    <h2>{{error_tile}}</h2>
-    <p>{{error_description}}</p>
-    <p>Sorry about that.</p>
-    <hr/>
-    <p>
-    Links:
-    <a class="button" href="//{{fiy_domain}}/portal">{{fiy_domain}} Portal</a>
-    | <a class="button" href="{{fiy_baseuri}}">Home</a>
-    {{links}}
-    </p>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="//{{fiy_domain}}/portal">{{fiy_domain}} Portal</a><a href="{{fiy_baseuri}}">Git-IY</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
 </header>
+<main>
+    <div class="page-head">
+        <h1>That didn't work!</h1>
+        <h2>{{error_title}}</h2>
+        <p>{{error_description}}</p>
+        <p>Sorry about that.</p>
+        <div class="cta-row">
+            <a class="btn btn-primary" href="{{fiy_baseuri}}">Home</a>
+            <a class="btn btn-secondary" href="//{{fiy_domain}}/portal">{{fiy_domain}} Portal</a>
+            {{links}}
+        </div>
+    </div>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
 </body>
 </html>

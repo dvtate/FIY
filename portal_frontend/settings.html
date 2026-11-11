@@ -1,18 +1,29 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Settings — FIY</title>
+<meta name="description" content="Manage your FIY account">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
 </head>
 <body>
+{{navbar}}
+<main class="settings">
+<a href="/portal">Back to apps</a>
+<div class="page-head"><h1>Account settings</h1></div>
     <fieldset>
         <legend>End Session</legend>
         <p>This will end your current session. Sessions on other devices and browsers will remain active.</p>
-        <button class="ms-bg-red" onclick="endSession()">End Session</button>
+        <button class="btn btn-primary" onclick="endSession()">End Session</button>
     </fieldset>
     <fieldset>
         <legend>Log Out</legend>
         <p>This will end all active sessions for your account, including on other devices and browsers.</p>
-        <button class="ms-bg-red" onclick="endAllSessions()">Log Out</button>
+        <button class="btn btn-primary" onclick="endAllSessions()">Log Out</button>
     </fieldset>
     <fieldset>
         <legend>Delete Account</legend>
@@ -23,8 +34,13 @@
             other instances. This could result in lingering traces of your account. With your account deleted there is
             also a risk of a malicious user attempting to impersonate you. If you still want to delete your account, we
             totally understand, and we're sorry to see you go.</p>
-        <button class="ms-bg-red" onclick="">Permanently Log Out</button>
+        <button class="btn btn-primary" onclick="">Permanently Log Out</button>
     </fieldset>
+
+</main>
+<footer>
+  FIY — Federate It Yourself.
+</footer>
 
     <script>
         function endSession() {

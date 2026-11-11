@@ -1,4 +1,15 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thread — FIY Social</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
+</head>
+<body>
 <!--
 view thread/post
 - previous posts in thread w/ button to load more
@@ -6,3 +17,20 @@ view thread/post
 - full contents
 - list of relpy posts (with abridged comments)
 -->
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation"><a href="/portal">Portal</a><a href="/social">Social</a></nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+    </div>
+  </div>
+</header>
+<main>
+<div class="page-head"><h1>Thread</h1></div>
+<div id="thread-posts"></div>
+<button class="btn btn-secondary" id="load-more" type="button">Load more</button>
+</main>
+<footer>FIY — Federate It Yourself.</footer>
+</body>
+</html>

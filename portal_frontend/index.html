@@ -1,188 +1,159 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>FIY - Federate It Yourself</title>
-    <style>
-        body {
-            background-color: #ddd;
-        }
-        dt {
-            font-weight: bold;
-        }
-        dd {
-            margin-bottom: 8px;
-        }
-        .get-started-button {
-            display: inline-block;
-            padding: 10px;
-            margin: 10px;
-            background-color: rgb(250,77,96);
-            font-weight: bold;
-            color: white;
-            text-decoration: none;
-        }
-        .get-started-button:hover {
-            background-color: rgb(255,100,120);
-            cursor: pointer;
-            padding: 8px;
-            border: 2px solid white;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIY - Federate It Yourself</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/portal/main.css?v=4">
+<script src="/portal/theme.js?v=4"></script>
 </head>
-<body>
-    <nav>
-        <a href="/portal">Portal</a>
-        | <a href="/portal/login">Log In</a>
-        | <a href="/portal/signup">Sign Up</a>
-    </nav>
-    <section>
-        <h1>Welcome to <abbr>FIY</abbr> &mdash; Federate It Yourself!</h1>
-        <p>
-            FIY is a federation protocol and app platform that lets you own the services you
-            use without losing the interconnectedness of the internet. With FIY, a single account
-            works seamlessly across multiple apps and instances.
-        </p>
-    </section>
-    <section id="whats-federation">
-        <h2>What is Federation?</h2>
-        <p>Federation is when services agree on standards allowing them to operate in as a collective.</p>
-        <p>
-            Email is a classic example. Because email is built on federated protocols, you can host
-            your own Email server or use a public provider and still communicate with anyone else.
-        </p>
+<body class="landing">
 
-        <h2>Why Federation?</h2>
-        <p>
-            Control of the internet is increasingly concentrated in the hands of a few powerful corporate monopolies.
-            The public actions, profit incentives, poor governance, and lack of oversight have led to growing distrust
-            in these custodians of the internet and a push for alternatives not under their control.
-        </p>
-        <p>
-            Most Alternatives fall into one of the following categories:
-        </p>
-        <dl>
-            <dt>Corporate Alternative</dt>
-            <dd>Competition is good, however, these often face familiar outcomes:
-                <ol>
-                    <li>Acquisition by a larger company</li>
-                    <li>Changes in leadership or direction</li>
-                    <li>Service shutdown</li>
-                    <li>Same trust and privacy issues</li>
-                </ol>
-            </dd>
-            <dd>Example: Switching from Microsoft Teams to Slack</dd>
+{{navbar}}
 
-            <dt>Self-hosting</dt>
-            <dd></dd>
-            <dd>Users independently host alternatives to corporate services.</dd>
-            <dd>Many of these are also <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">
-                Free and Open Source Software (FOSS)</a>, which gives additional freedoms and transparency.</dd>
-            <dd>The independence and control this offers is perfect for single-user services, however,
-                for multi-user services, users are forced to create accounts on every server they want to
-                interact with.
-            </dd>
-            <dd>Example: switching from Slack to RocketChat</dd>
+<main>
 
-            <dt>Federated Alternatives</dt>
-            <dd>
-                Servers running shared protocols that enable seamless cross-server interactions. Like email,
-                you can use choose a provider or host your own and still interact with users on other servers.
-            </dd>
-            <dd>This combines the freedom and control of self-hosting with the connectivity of centralized platforms.</dd>
-            <dd>Example: Switching from RocketChat to XMPP</dd>
-        </dl>
+  <section class="hero">
+    <h1>Welcome to FIY — Federate It Yourself!</h1>
+    <p>FIY is a federation protocol and app platform that lets you own the services you use without losing the interconnectedness of the internet. With FIY, a single account works seamlessly across multiple apps and instances.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/portal/signup">Make an account</a>
+      <a class="btn btn-secondary" href="https://fiy.to">Host your own instance</a>
+    </div>
+  </section>
 
-        <h2>FIY &mdash; Your Home for Federated Apps</h2>
-        <p>
-<!--            While there are many self-hostable, and even some federated alternatives to the corporate SaaS offerings-->
-<!--            that seem impossible to escape, there are some pain points: Having to manually install and configure every-->
-<!--            service can be challenging and easy to get wrong. The redundant account systems are inconvenient and prevent-->
-<!--            the cross-app integrations we've come to expect.-->
+  <section>
+    <h2>What is Federation?</h2>
+    <p>Federation is when services agree on standards allowing them to operate in as a collective.</p>
+    <p>Email is a classic example. Because email is built on federated protocols, you can host your own email server or use a public provider and still communicate with anyone else.</p>
+  </section>
 
-            Self-hosting your own services is possible but the redundant account systems and lack of cross-app
-            integrations leads to a degraded user experience.
-        </p>
-        <p>
-            FIY solves this by providing a unified platform for federated apps on your server. Use the same account
-            with any app installed on your instance. FIY handles authentication and makes it easy for developers to
-            create or adapt apps for federation with easy to use APIs and tooling. This enables powerful features
-            like a unified home for notifications, using the same profile and contacts across all apps, streamlined
-            app management among other things.
-        </p>
+  <section>
+    <h2>Why Federation?</h2>
+    <p>Control of the internet is increasingly concentrated in the hands of a few powerful corporate monopolies. The public actions, profit incentives, poor governance, and lack of oversight have led to growing distrust in these custodians of the internet and a push for alternatives not under their control.</p>
+    <p>Most alternatives fall into one of the following categories:</p>
 
-        <!--
-            Criteria:
-            - Free from corporate hegemony
-            - User-owned
-            - Private
-            - Risk of shutdown
-            - Interconnected
-        -->
+    <div class="alt">
+      <h3>Corporate Alternative</h3>
+      <p>Competition is good, however, these often face familiar outcomes:</p>
+      <ol>
+        <li>Acquisition by a larger company</li>
+        <li>Changes in leadership or direction</li>
+        <li>Service shutdown</li>
+        <li>Same trust and privacy issues</li>
+      </ol>
+      <p class="example"><strong>Example:</strong> Switching from Microsoft Teams to Slack</p>
+    </div>
 
-    </section>
-    <section id="features">
-        <h2>Key Features</h2>
-        <p>FIY offers many advantages over centralized apps and even over other federated services.</p>
-        <dl>
-            <dt>Self-hostable</dt>
-            <dd>Find an instance to join or host your own.</dd>
-            <dd>FIY is written in performant C++ and designed to be run on consumer hardware.</dd>
+    <div class="alt">
+      <h3>Self-hosting</h3>
+      <p>Users independently host alternatives to corporate services.</p>
+      <p>Many of these are also <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software">Free and Open Source Software (FOSS)</a>, which gives additional freedoms and transparency.</p>
+      <p>The independence and control this offers is perfect for single-user services, however, for multi-user services, users are forced to create accounts on every server they want to interact with.</p>
+      <p class="example"><strong>Example:</strong> Switching from Slack to RocketChat</p>
+    </div>
 
-            <dt>App Platform</dt>
-            <dd>Use the same account on all the apps installed on your instance, and even with 3rd party apps via OAuth.</dd>
+    <div class="alt">
+      <h3>Federated Alternatives</h3>
+      <p>Servers running shared protocols that enable seamless cross-server interactions. Like email, you can choose a provider or host your own and still interact with users on other servers.</p>
+      <p>This combines the freedom and control of self-hosting with the connectivity of centralized platforms.</p>
+      <p class="example"><strong>Example:</strong> Switching from RocketChat to XMPP</p>
+    </div>
+  </section>
 
-            <dt>Data Sovereignty</dt>
-            <dd>Own your data: control access, ensure deletion, easily make backups, etc.</dd>
+  <section>
+    <h2>FIY — Your Home for Federated Apps</h2>
+    <p>Self-hosting your own services is possible but the redundant account systems and lack of cross-app integrations leads to a degraded user experience.</p>
+    <p>FIY solves this by providing a unified platform for federated apps on your server. Use the same account with any app installed on your instance. FIY handles authentication and makes it easy for developers to create or adapt apps for federation with easy to use APIs and tooling. This enables powerful features like a unified home for notifications, using the same profile and contacts across all apps, streamlined app management among other things.</p>
+  </section>
 
-            <dt>Free and Open Source</dt>
-            <dd>The <a href="https://git.fiy.to/fiy/fiy" target="_blank">platform and protocol are open source</a> allowing 3rd party audits and bug reports.</dd>
-        </dl>
-    </section>
+  <section>
+    <h2>Key Features</h2>
+    <p>FIY offers many advantages over centralized apps and even over other federated services.</p>
+    <ul class="feature-list">
+      <li>
+        <span class="dot"></span>
+        <div class="feature-body">
+          <h3>Self-hostable</h3>
+          <p>Find an instance to join or host your own. FIY is written in performant C++ and designed to be run on consumer hardware.</p>
+        </div>
+      </li>
+      <li>
+        <span class="dot"></span>
+        <div class="feature-body">
+          <h3>App Platform</h3>
+          <p>Use the same account on all the apps installed on your instance, and even with 3rd party apps via OAuth.</p>
+        </div>
+      </li>
+      <li>
+        <span class="dot"></span>
+        <div class="feature-body">
+          <h3>Data Sovereignty</h3>
+          <p>Own your data: control access, ensure deletion, easily make backups, etc.</p>
+        </div>
+      </li>
+      <li>
+        <span class="dot"></span>
+        <div class="feature-body">
+          <h3>Free and Open Source</h3>
+          <p>The <a href="https://git.fiy.to/fiy/fiy">platform and protocol are open source</a>, allowing 3rd party audits and bug reports.</p>
+        </div>
+      </li>
+    </ul>
+  </section>
 
-    <section id="apps">
-        <h2>Built-in Apps</h2>
-        <p>In addition to installable apps, </p>
-        <dl>
-            <dt><a href="/mods/git">Git-IY</a></dt>
-            <dd>Federated GitHub alternative free from Microsoft's shenanegans.</dd>
-            <dd>Contribute to multiple open source
-                <span title="Many open source projects currently use non-federated git hosting providers, contributors want a single profile they can use as a portfolio">
-            projects with a single account.</span></dd>
+  <section>
+    <h2 id="apps">Built-in Apps</h2>
+    <p>In addition to installable apps,</p>
 
-            <dt><a href="/mods/contacts">Contacts-IY</a></dt>
-            <dd>Import, export, manage, share, etc. contacts knowing that they aren't being handled by an advertising firm.</dd>
-            <dd>Make a profile, choose what other users can see, use the same profile across all FIY apps.</dd>
+    <div class="app">
+      <a class="app-name" href="/git">Git-IY</a>
+      <p>Federated GitHub alternative free from Microsoft's shenanegans.</p>
+      <p>Contribute to multiple open source projects with a single account.</p>
+    </div>
 
-            <dt><a href="/mods/mail">Chat-IY</a></dt>
-            <dd>Store your messages in a database that you control (or don't store anything).</dd>
-            <dd>Encrypt your messages.</dd>
+    <div class="app">
+      <a class="app-name" href="/contacts">Contacts-IY</a>
+      <p>Import, export, manage, share, etc. contacts knowing that they aren't being handled by an advertising firm.</p>
+      <p>Make a profile, choose what other users can see, use the same profile across all FIY apps.</p>
+    </div>
 
-            <dt>Notifications</dt>
-            <dd>Manage notifications across all your apps.</dd>
+    <div class="app">
+      <a class="app-name" href="/chat">Chat-IY</a>
+      <p>Store your messages in a database that you control (or don't store anything).</p>
+      <p>Encrypt your messages.</p>
+    </div>
 
-            <dt>HTTP Server Utilities</dt>
-            <dd>FIY includes basic HTTP server functionality, similar to Apache/nginx.
-                This allows you to host static websites, blogs, wikis, etc. or even dynamic apps
-                via reverse-proxy or CGI scripts. Or just redirect users to another website.</dd>
-        </dl>
+    <div class="app">
+      <h3>Notifications</h3>
+      <p>Manage notifications across all your apps.</p>
+    </div>
 
-        <h2>App Development Platform</h2>
-        <p>
-            It's easy to develop or convert apps to work with FIY.
-            It's like making any other webapp, except authentication is handled by the protocol server and there's
-            an easy-to-use API for interacting with the host and making requests to other apps.
-            There's also a native development toolkit that lets your app link directly with the protocol server,
-            enabling maximum performance without the pains of network programming.
-        </p>
-    </section>
+    <div class="app">
+      <h3>HTTP Server Utilities</h3>
+      <p>FIY includes basic HTTP server functionality, similar to Apache/nginx. This allows you to host static websites, blogs, wikis, etc. or even dynamic apps via reverse-proxy or CGI scripts. Or just redirect users to another website.</p>
+    </div>
+  </section>
 
-    <section class="get-started">
-        <a class="get-started-button" href="/portal/signup" id="signup-btn">Make an account</a>
-        <a class="get-started-button" href="https://fiy.to" target="_blank">Host your own instance</a>
-    </section>
+  <section>
+    <h2>App Development Platform</h2>
+    <p>It's easy to develop or convert apps to work with FIY. It's like making any other webapp, except authentication is handled by the protocol server and there's an easy-to-use API for interacting with the host and making requests to other apps. There's also a native development toolkit that lets your app link directly with the protocol server, enabling maximum performance without the pains of network programming.</p>
+  </section>
 
-    <script>
-        document.getElementById('signup-btn').innerHTML += " on " + window.location.host;
-    </script>
+  <section class="closing" >
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/portal/signup">Make an account</a>
+      <a class="btn btn-secondary" href="https://fiy.to">Host your own instance</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  FIY — Federate It Yourself.
+</footer>
+
 </body>
 </html>

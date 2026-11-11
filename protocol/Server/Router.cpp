@@ -38,23 +38,20 @@ static void request_mod(std::shared_ptr<Session> conn, Mod* m, const std::string
             Session::StringResponse res{
                 http::status::ok,
                 conn->req().version(),
-                Pages::file_contents<subpath>()
+                Pages::file_contents<subpath>(conn->find_user_local().get())
             };
             res.set(http::field::content_type, "text/html");
+            res.set(http::field::cache_control, "private, no-store");
             conn->respond(conn->prep(std::move(res)));
             DEBUG_LOG("No root mod, responding with landing page");
             return;
         }
 
         // Warn about missing mod
-        Session::DynamicResponse res;
-        res.result(404);
-        boost::beast::ostream(res.body())
-            << "<h1>404 - Could not find a mod to handle your request</h1>"
-                "\n<hr/>\n<p>For a list of apps: check the <a href=\""
-            << g_fiy->base_uri() << "/portal\">portal</a></p>\n";
-        res.set(http::field::content_type, "text/html");
-        conn->respond(conn->prep(std::move(res)));
+        conn->respond(conn->prep(Pages::not_found_page(
+            conn->find_user_local().get(),
+            "Could not find a mod to handle your request. For a list of apps, check the portal."
+        )));
         DEBUG_LOG("Invalid mod: " <<conn->req().target() <<" : " <<uri);
         return;
     }
@@ -572,7 +569,6 @@ void route_request(std::shared_ptr<Session> conn) {
                     conn->respond(conn->prep(Pages::signup_page()));
                     return;
                 } else if (path.starts_with("/theme.js")) {
-                    // Send cached file contents
                     static constexpr char subpath[] = "/theme.js";
                     Session::StringResponse res{
                         http::status::ok,
@@ -584,7 +580,7 @@ void route_request(std::shared_ptr<Session> conn) {
                     return;
                 } else if (path.starts_with("/main.css")) {
                     // Send cached file contents
-                    static constexpr char subpath[] = "/assets/minstyle.io.min.css";
+                    static constexpr char subpath[] = "/main.css";
                     Session::StringResponse res{
                         http::status::ok,
                         conn->req().version(),
@@ -650,10 +646,10 @@ void route_request(std::shared_ptr<Session> conn) {
                     return;
                 } else {
                     std::cerr <<"404 -- GET /portal : " <<path <<std::endl;
-                    Session::StringResponse res;
-                    res.body() = "404 not found!\n";
-                    res.result(404);
-                    conn->respond(conn->prep(std::move(res)));
+                    conn->respond(conn->prep(Pages::not_found_page(
+                        conn->find_user_local().get(),
+                        "The portal page you requested could not be found."
+                    )));
                     DEBUG_LOG("404 - " <<conn->req().target());
                     return;
                 }
@@ -699,10 +695,10 @@ void route_request(std::shared_ptr<Session> conn) {
                     return;
                 } else {
                     std::cerr <<"404 -- POST /portal : " <<path <<std::endl;
-                    Session::StringResponse res;
-                    res.body() = "404 not found!\n";
-                    res.result(404);
-                    conn->respond(conn->prep(std::move(res)));
+                    conn->respond(conn->prep(Pages::not_found_page(
+                        conn->find_user_local().get(),
+                        "The portal page you requested could not be found."
+                    )));
                     return;
                 }
             } else if (path == "/peer/handshake") {
