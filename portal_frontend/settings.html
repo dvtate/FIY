@@ -5,13 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Account Settings — FIY</title>
 <meta name="description" content="Manage your FIY account">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="/portal/main.css?v=4">
-<script src="/portal/theme.js?v=4"></script>
+<link rel="stylesheet" href="/portal/main.css">
+<script src="/portal/theme.js" defer></script>
+<style>
+    body { padding-top: 48px; padding-bottom: 64px; }
+    h1 { margin-bottom: 24px; }
+</style>
 </head>
 <body>
-{{navbar}}
+
+<header>
+    <div class="bar">
+        <a class="wordmark" href="/">FIY<span>.</span></a>
+        <div class="bar-right">
+            <nav aria-label="Main navigation">
+                <a href="/portal">Portal</a>
+            </nav>
+            <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
+        </div>
+    </div>
+</header>
+
 <main class="settings">
 <a href="/portal">Back to apps</a>
 <div class="page-head"><h1>Account settings</h1></div>
@@ -38,9 +52,6 @@
     </fieldset>
 
 </main>
-<footer>
-  FIY — Federate It Yourself.
-</footer>
 
     <script>
         function endSession() {

@@ -4,19 +4,101 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FIY - Federate It Yourself</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="/portal/main.css?v=4">
-<script src="/portal/theme.js?v=4"></script>
-</head>
-<body class="landing">
+<link rel="stylesheet" href="/portal/main.css">
+<script src="/portal/theme.js" defer></script>
+<style>
+  body section {
+    padding: 40px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  body section:last-of-type { border-bottom: none; }
 
-{{navbar}}
+  body .hero { padding-top: 72px; padding-bottom: 48px; }
+
+  body h1 {
+    font-size: 38px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 20px;
+    font-weight: 700;
+  }
+  .hero p {
+    font-size: 18px;
+    color: var(--muted);
+    /*max-width: 56ch;*/
+    margin: 0 0 28px;
+  }
+
+  .alt {
+    padding: 20px 20px;
+    border-left: 3px solid var(--red);
+    background: var(--tint);
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 18px;
+  }
+  .alt:last-child { margin-bottom: 0; }
+  .alt h3 { margin-bottom: 6px; }
+  .alt p { margin-bottom: 10px; color: var(--ink); }
+  .alt ol { margin: 0 0 10px; padding-left: 20px; }
+  .alt li { margin-bottom: 2px; }
+  .example { font-size: 15px; color: var(--muted); margin-bottom: 0; }
+  .example strong { color: var(--ink); font-weight: 600; }
+
+  .feature-list { list-style: none; margin: 0; padding: 0; }
+  .feature-list li {
+    display: flex;
+    gap: 14px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+  }
+  .feature-list li:first-child { border-top: none; padding-top: 0; }
+  .feature-list li:last-child { padding-bottom: 0; }
+  .dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    margin-top: 8px;
+  }
+  .feature-body p { margin-bottom: 0; color: var(--muted); }
+
+  .app{ padding: 20px 0; border-top: 1px solid var(--line); }
+  .app:first-child{ border-top: none; padding-top: 0; }
+  .app a.app-name{ font-size: 17px; font-weight: 600; text-decoration: none; }
+  .app p{ color: var(--muted); margin-top: 6px; margin-bottom: 6px; }
+  .app p:last-child{ margin-bottom: 0; }
+
+  footer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="/">FIY<span>.</span></a>
+    <div class="bar-right">
+      <nav aria-label="Main navigation">
+        <a href="/portal">Portal</a>
+        <a href="/portal/login">Log In</a>
+        <a href="/portal/signup">Sign Up</a>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
+    </div>
+  </div>
+</header>
 
 <main>
-
   <section class="hero">
-    <h1>Welcome to FIY — Federate It Yourself!</h1>
+      <!-- This text wraps weird -->
+    <h1>Welcome to FIY &mdash; Federate It Yourself!</h1>
     <p>FIY is a federation protocol and app platform that lets you own the services you use without losing the interconnectedness of the internet. With FIY, a single account works seamlessly across multiple apps and instances.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="/portal/signup">Make an account</a>
@@ -35,6 +117,7 @@
     <p>Control of the internet is increasingly concentrated in the hands of a few powerful corporate monopolies. The public actions, profit incentives, poor governance, and lack of oversight have led to growing distrust in these custodians of the internet and a push for alternatives not under their control.</p>
     <p>Most alternatives fall into one of the following categories:</p>
 
+    <!-- TODO traffic light colors red, yellow, green -->
     <div class="alt">
       <h3>Corporate Alternative</h3>
       <p>Competition is good, however, these often face familiar outcomes:</p>
@@ -64,7 +147,7 @@
   </section>
 
   <section>
-    <h2>FIY — Your Home for Federated Apps</h2>
+    <h2>FIY &mdash; Your Home for Federated Apps</h2>
     <p>Self-hosting your own services is possible but the redundant account systems and lack of cross-app integrations leads to a degraded user experience.</p>
     <p>FIY solves this by providing a unified platform for federated apps on your server. Use the same account with any app installed on your instance. FIY handles authentication and makes it easy for developers to create or adapt apps for federation with easy to use APIs and tooling. This enables powerful features like a unified home for notifications, using the same profile and contacts across all apps, streamlined app management among other things.</p>
   </section>
@@ -106,7 +189,7 @@
 
   <section>
     <h2 id="apps">Built-in Apps</h2>
-    <p>In addition to installable apps,</p>
+    <p>FIY comes with some useful apps, and you're free to install more.</p>
 
     <div class="app">
       <a class="app-name" href="/git">Git-IY</a>
@@ -143,6 +226,7 @@
   </section>
 
   <section class="closing" >
+    <h2>Get Started</h2>
     <div class="cta-row">
       <a class="btn btn-primary" href="/portal/signup">Make an account</a>
       <a class="btn btn-secondary" href="https://fiy.to">Host your own instance</a>
@@ -152,7 +236,7 @@
 </main>
 
 <footer>
-  FIY — Federate It Yourself.
+FIY &mdash; Federate It Yourself.
 </footer>
 
 </body>

@@ -1,6 +1,6 @@
 /* Contacts-IY components on top of /portal/main.css (IBM Plex + red). */
 body {
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: Arial, sans-serif;
     background: var(--paper);
     color: var(--ink);
 }

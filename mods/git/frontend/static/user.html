@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="/portal/main.css?v=4">
     <link rel="stylesheet" href="{{fiy_baseuri}}/main.css">
-    <script src="/portal/theme.js?v=4"></script>
+    <script src="/portal/theme.js" defer></script>
     <style>
         #user-pfp { width: 64px; height: 64px; border-radius: 14px; object-fit: cover; }
         .repo-card {
@@ -27,8 +27,13 @@
   <div class="bar">
     <a class="wordmark" href="/">FIY<span>.</span></a>
     <div class="bar-right">
-      <nav aria-label="Main navigation"><a href="//{{fiy_domain}}/portal">Portal</a><a href="{{fiy_baseuri}}">Git-IY</a><a href="{{fiy_baseuri}}/{{request_user}}">Profile</a><a href="{{fiy_baseuri}}/repo/new">New Repo</a></nav>
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+      <nav aria-label="Main navigation">
+          <a href="//{{fiy_domain}}/portal">Portal</a>
+          <a href="{{fiy_baseuri}}">Git-IY</a>
+          <a href="{{fiy_baseuri}}/{{request_user}}">Profile</a>
+          <a href="{{fiy_baseuri}}/repo/new">New Repo</a>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
     </div>
   </div>
 </header>
@@ -56,7 +61,6 @@
     <div id="tab-view">
     </div>
 </main>
-<footer>FIY — Federate It Yourself.</footer>
     <script>
         const domain = "{{fiy_domain}}";
         const baseUrl = "{{fiy_baseuri}}";

@@ -31,27 +31,18 @@ static void request_mod(std::shared_ptr<Session> conn, Mod* m, const std::string
     // No mod
     if (m == nullptr) {
         // No '' mod, use default index.html
-        if (conn->req()["host"] == g_fiy->config.hostname
-            && conn->req().target() == "/"
+        if (conn->req().target() == "/"
+            && conn->req()["host"] == g_fiy->config.hostname
         ) {
-            static const char subpath[] = "/index.html";
-            Session::StringResponse res{
-                http::status::ok,
-                conn->req().version(),
-                Pages::file_contents<subpath>(conn->find_user_local().get())
-            };
-            res.set(http::field::content_type, "text/html");
-            res.set(http::field::cache_control, "private, no-store");
-            conn->respond(conn->prep(std::move(res)));
+            static const auto resp = Pages::default_landing_page();
+            conn->respond(conn->prep(resp));
             DEBUG_LOG("No root mod, responding with landing page");
             return;
         }
 
         // Warn about missing mod
         conn->respond(conn->prep(Pages::not_found_page(
-            conn->find_user_local().get(),
-            "Could not find a mod to handle your request. For a list of apps, check the portal."
-        )));
+            "Could not find a mod to handle your request. For a list of apps, check the portal.")));
         DEBUG_LOG("Invalid mod: " <<conn->req().target() <<" : " <<uri);
         return;
     }
@@ -647,9 +638,7 @@ void route_request(std::shared_ptr<Session> conn) {
                 } else {
                     std::cerr <<"404 -- GET /portal : " <<path <<std::endl;
                     conn->respond(conn->prep(Pages::not_found_page(
-                        conn->find_user_local().get(),
-                        "The portal page you requested could not be found."
-                    )));
+                        "The portal page you requested could not be found.")));
                     DEBUG_LOG("404 - " <<conn->req().target());
                     return;
                 }
@@ -662,6 +651,7 @@ void route_request(std::shared_ptr<Session> conn) {
                 }
 
                 // Send key
+                // TODO add a randomly generated field and track it in a cache to make sure we get it back in handshake
                 Session::StringResponse res;
                 res.result(200);
                 res.set("Fiy-Now", std::to_string(g_fiy->now()));
@@ -696,9 +686,7 @@ void route_request(std::shared_ptr<Session> conn) {
                 } else {
                     std::cerr <<"404 -- POST /portal : " <<path <<std::endl;
                     conn->respond(conn->prep(Pages::not_found_page(
-                        conn->find_user_local().get(),
-                        "The portal page you requested could not be found."
-                    )));
+                        "The portal page you requested could not be found.")));
                     return;
                 }
             } else if (path == "/peer/handshake") {

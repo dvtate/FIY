@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notifications — FIY</title>
     <meta name="description" content="Manage notifications across all your FIY apps">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="/portal/main.css?v=4">
-    <script src="/portal/theme.js?v=4"></script>
+    <link rel="stylesheet" href="/portal/main.css">
+    <script src="/portal/theme.js" defer></script>
 </head>
 <body>
 <header>
   <div class="bar">
     <a class="wordmark" href="/">FIY<span>.</span></a>
     <div class="bar-right">
-      <nav aria-label="Main navigation"><a href="/portal">Portal</a><a href="/notifications">Notifications</a></nav>
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+      <nav aria-label="Main navigation">
+          <a href="/portal">Portal</a>
+          <a href="/notifications">Notifications</a>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
     </div>
   </div>
 </header>
@@ -27,7 +28,7 @@
 </main>
 <footer>FIY — Federate It Yourself.</footer>
 <script>
-  // TODO: fetch from notifications API and render into #notifications-list.
+  // TODO: fetch from notifications mod and render into #notifications-list.
 </script>
 </body>
 </html>

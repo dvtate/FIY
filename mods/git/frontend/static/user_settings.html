@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" sizes="any" type="image/svg+xml" href="{{fiy_baseuri}}/logo.svg">
     <title>User Settings | Git-IY</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="/portal/main.css?v=4">
-    <script src="/portal/theme.js?v=4"></script>
+    <link rel="stylesheet" href="/portal/main.css">
+    <script src="/portal/theme.js" defer></script>
 </head>
 <body>
 <!--
@@ -26,8 +24,11 @@ Settings:
   <div class="bar">
     <a class="wordmark" href="/">FIY<span>.</span></a>
     <div class="bar-right">
-      <nav aria-label="Main navigation"><a href="//{{fiy_domain}}/portal">Portal</a><a href="{{fiy_baseuri}}">Git-IY</a></nav>
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+      <nav aria-label="Main navigation">
+          <a href="//{{fiy_domain}}/portal">{{fiy_domain}} Portal</a>
+          <a href="{{fiy_baseuri}}">Git-IY</a>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
     </div>
   </div>
 </header>
@@ -45,6 +46,5 @@ Settings:
     <button class="btn btn-secondary" type="button">Manage</button>
 </fieldset>
 </main>
-<footer>FIY — Federate It Yourself.</footer>
 </body>
 </html>

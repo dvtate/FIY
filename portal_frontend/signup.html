@@ -4,15 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign Up — FIY</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="/portal/main.css?v=4">
-<script src="/portal/theme.js?v=4"></script>
+<link rel="stylesheet" href="/portal/main.css">
+<script src="/portal/theme.js" defer></script>
+<style>
+    .signup { margin: 0 auto; }
+    .signup { max-width: 380px; padding: 64px 0 80px; }
+    .signup h1 { font-size: 28px; margin-bottom: 6px; }
+    .signup > p { color: var(--muted); margin-bottom: 32px; font-size: 15px; }
+    .signup .btn-primary { width: 100%; margin-top: 6px; }
+    .signup .login-note { text-align: center; margin: 0; }
+
+    @media (max-width: 480px) {
+        .signup { padding: 40px 0 64px; }
+    }
+</style>
 </head>
 <body>
-
-{{navbar}}
-
+<header>
+    <div class="bar">
+        <a class="wordmark" href="/">FIY<span>.</span></a>
+        <div class="bar-right">
+            <nav aria-label="Main navigation">
+                <a href="/portal">Portal</a>
+                <a href="/portal/login">Log In</a>
+                <a href="/portal/signup" class="current" aria-current="page">Sign Up</a>
+            </nav>
+            <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
+        </div>
+    </div>
+</header>
 <main>
   <div class="signup">
     <h1>Create your account</h1>
@@ -30,7 +50,7 @@
         <input type="email" id="contact" name="contact" maxlength="255" autocomplete="email" placeholder="you@example.com">
       </div>
 
-<div class="field">
+      <div class="field">
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required autocomplete="new-password">
       </div>
@@ -49,10 +69,6 @@
     <p class="login-note">Already have an account? <a href="/portal/login">Log in</a></p>
   </div>
 </main>
-
-<footer>
-  FIY — Federate It Yourself.
-</footer>
 
 <script>
 const password = document.getElementById("password");

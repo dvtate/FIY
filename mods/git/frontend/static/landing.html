@@ -7,11 +7,9 @@
     <link rel="alternate icon" type="image/x-icon" href="{{fiy_baseuri}}/favicon.ico">
     <title>Git-IY - Federated Git</title>
     <meta name="description" content="Federated Git hosting on FIY">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <link rel="stylesheet" href="/portal/main.css">
     <link rel="stylesheet" href="{{fiy_baseuri}}/main.css">
-    <script src="/portal/theme.js?v=4"></script>
+    <script src="/portal/theme.js" defer></script>
     <style>
         #logo {
             font-size: 10vh;
@@ -33,8 +31,12 @@
   <div class="bar">
     <a class="wordmark" href="/">FIY<span>.</span></a>
     <div class="bar-right">
-      <nav aria-label="Main navigation"><a href="//{{fiy_domain}}/portal">{{fiy_domain}} Portal</a><a href="{{fiy_baseuri}}">Git-IY</a><a href="{{profile_url}}">Profile</a></nav>
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+      <nav aria-label="Main navigation">
+          <a href="//{{fiy_domain}}/portal">{{fiy_domain}} Portal</a>
+          <a href="{{fiy_baseuri}}">Git-IY</a>
+          <a href="{{profile_url}}">Profile</a>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
     </div>
   </div>
 </header>
@@ -81,8 +83,7 @@
         })();
     </script>
 
-    <!-- TODO real-time activity stream -->
+    <!-- TODO real-time activity stream ? -->
 </main>
-<footer>FIY — Federate It Yourself.</footer>
 </body>
 </html>

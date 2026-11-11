@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Log In — FIY OAuth</title>
 <meta name="description" content="Log into a FIY instance with OAuth">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="/portal/main.css?v=4">
-<script src="/portal/theme.js?v=4"></script>
+<link rel="stylesheet" href="/portal/main.css">
+<script src="/portal/theme.js" defer></script>
 </head>
 <body>
 <!--
@@ -24,8 +22,12 @@ Key parts:
   <div class="bar">
     <a class="wordmark" href="/">FIY<span>.</span></a>
     <div class="bar-right">
-      <nav aria-label="Main navigation"><a href="/portal">Portal</a><a href="/portal/login">Log In</a><a href="/portal/signup">Sign Up</a></nav>
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+      <nav aria-label="Main navigation">
+        <a href="/portal">Portal</a>
+        <a href="/portal/login">Log In</a>
+        <a href="/portal/signup">Sign Up</a>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
     </div>
   </div>
 </header>
@@ -59,7 +61,7 @@ Key parts:
     </div>
   </div>
 </main>
-<footer>FIY — Federate It Yourself.</footer>
+<footer>FIY &mdash; Federate It Yourself.</footer>
 <script>
 (function() {
   const instanceDomain = window.location.hostname;
@@ -70,6 +72,8 @@ Key parts:
     const err = document.getElementById('oauth-error');
     if (!username) { err.textContent = 'Enter a username.'; return; }
     err.textContent = '';
+
+    // TODO username invalid if there's more than one @, so this logic can be simplified somewhat
     const at = username.lastIndexOf('@');
     if (at !== -1 && !username.endsWith('@' + instanceDomain) && username.slice(at + 1) !== instanceDomain) {
       const foreign = username.slice(at + 1);

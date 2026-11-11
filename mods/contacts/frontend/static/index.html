@@ -6,13 +6,10 @@
     <title>Contacts — FIY</title>
     <meta name="description" content="Manage your contacts on FIY">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="/portal/main.css?v=4">
+    <link rel="stylesheet" href="/portal/main.css">
     <link rel="stylesheet" href="{{fiy_contacts_base_uri}}/main.css" />
-    <script src="/portal/theme.js?v=4"></script>
+    <script src="/portal/theme.js" defer></script>
 
-    <!-- TODO locally host this instead -->
     <link rel="stylesheet" href="{{fiy_contacts_base_uri}}/fa/fa.css" />
     <link rel="icon" href="{{fiy_contacts_base_uri}}/favicon.ico" type="image/x-icon">
 </head>
@@ -22,7 +19,7 @@
     <a class="wordmark" href="/">FIY<span>.</span></a>
     <div class="bar-right">
       <nav aria-label="Main navigation"><a href="//{{fiy_contacts_domain}}/portal">Portal</a><a href="{{fiy_contacts_base_uri}}">Contacts</a></nav>
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">☾</button>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
     </div>
   </div>
 </header>
@@ -59,7 +56,6 @@
         <input type="file" id="contact-upload" accept="text/vcard" hidden />
     </div>
 </main>
-<footer>FIY — Federate It Yourself.</footer>
-    <script src="{{fiy_contacts_base_uri}}/main.js"></script>
+<script src="{{fiy_contacts_base_uri}}/main.js"></script>
 </body>
 </html>
