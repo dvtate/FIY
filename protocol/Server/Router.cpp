@@ -567,6 +567,7 @@ void route_request(std::shared_ptr<Session> conn) {
                         Pages::mm_file<subpath>()
                     };
                     res.set(http::field::content_type, "text/javascript");
+                    res.set(http::field::cache_control, "max-age=604800");
                     conn->respond(conn->prep(std::move(res)));
                     return;
                 } else if (path.starts_with("/main.css")) {
