@@ -31,30 +31,18 @@ static void request_mod(std::shared_ptr<Session> conn, Mod* m, const std::string
     // No mod
     if (m == nullptr) {
         // No '' mod, use default index.html
-        if (conn->req()["host"] == g_fiy->config.hostname
-            && conn->req().target() == "/"
+        if (conn->req().target() == "/"
+            && conn->req()["host"] == g_fiy->config.hostname
         ) {
-            static const char subpath[] = "/index.html";
-            Session::StringResponse res{
-                http::status::ok,
-                conn->req().version(),
-                Pages::file_contents<subpath>()
-            };
-            res.set(http::field::content_type, "text/html");
-            conn->respond(conn->prep(std::move(res)));
+            static const auto resp = Pages::default_landing_page();
+            conn->respond(conn->prep(resp));
             DEBUG_LOG("No root mod, responding with landing page");
             return;
         }
 
         // Warn about missing mod
-        Session::DynamicResponse res;
-        res.result(404);
-        boost::beast::ostream(res.body())
-            << "<h1>404 - Could not find a mod to handle your request</h1>"
-                "\n<hr/>\n<p>For a list of apps: check the <a href=\""
-            << g_fiy->base_uri() << "/portal\">portal</a></p>\n";
-        res.set(http::field::content_type, "text/html");
-        conn->respond(conn->prep(std::move(res)));
+        conn->respond(conn->prep(Pages::not_found_page(
+            "Could not find a mod to handle your request. For a list of apps, check the portal.")));
         DEBUG_LOG("Invalid mod: " <<conn->req().target() <<" : " <<uri);
         return;
     }
@@ -572,7 +560,6 @@ void route_request(std::shared_ptr<Session> conn) {
                     conn->respond(conn->prep(Pages::signup_page()));
                     return;
                 } else if (path.starts_with("/theme.js")) {
-                    // Send cached file contents
                     static constexpr char subpath[] = "/theme.js";
                     Session::StringResponse res{
                         http::status::ok,
@@ -580,11 +567,12 @@ void route_request(std::shared_ptr<Session> conn) {
                         Pages::mm_file<subpath>()
                     };
                     res.set(http::field::content_type, "text/javascript");
+                    res.set(http::field::cache_control, "max-age=604800");
                     conn->respond(conn->prep(std::move(res)));
                     return;
                 } else if (path.starts_with("/main.css")) {
                     // Send cached file contents
-                    static constexpr char subpath[] = "/assets/minstyle.io.min.css";
+                    static constexpr char subpath[] = "/main.css";
                     Session::StringResponse res{
                         http::status::ok,
                         conn->req().version(),
@@ -650,10 +638,8 @@ void route_request(std::shared_ptr<Session> conn) {
                     return;
                 } else {
                     std::cerr <<"404 -- GET /portal : " <<path <<std::endl;
-                    Session::StringResponse res;
-                    res.body() = "404 not found!\n";
-                    res.result(404);
-                    conn->respond(conn->prep(std::move(res)));
+                    conn->respond(conn->prep(Pages::not_found_page(
+                        "The portal page you requested could not be found.")));
                     DEBUG_LOG("404 - " <<conn->req().target());
                     return;
                 }
@@ -666,6 +652,7 @@ void route_request(std::shared_ptr<Session> conn) {
                 }
 
                 // Send key
+                // TODO add a randomly generated field and track it in a cache to make sure we get it back in handshake
                 Session::StringResponse res;
                 res.result(200);
                 res.set("Fiy-Now", std::to_string(g_fiy->now()));
@@ -699,10 +686,8 @@ void route_request(std::shared_ptr<Session> conn) {
                     return;
                 } else {
                     std::cerr <<"404 -- POST /portal : " <<path <<std::endl;
-                    Session::StringResponse res;
-                    res.body() = "404 not found!\n";
-                    res.result(404);
-                    conn->respond(conn->prep(std::move(res)));
+                    conn->respond(conn->prep(Pages::not_found_page(
+                        "The portal page you requested could not be found.")));
                     return;
                 }
             } else if (path == "/peer/handshake") {
