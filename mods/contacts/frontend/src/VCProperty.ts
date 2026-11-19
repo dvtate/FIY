@@ -1,3 +1,7 @@
+//
+// vCard field
+//
+
 import { VCDateTime } from "./VCDateTime";
 import {
     CustomAddressInput,
@@ -84,7 +88,7 @@ interface VCParams {
     //
     CALSCALE?: string;
 
-    //
+    // b/BASE64
     ENCODING?: string;
 }
 
@@ -389,7 +393,7 @@ const vCardProperties: { [k: string]: VCPropSpec } = {
     }
 };
 
-
+/// Part of a vCard
 export class VCProperty {
 
     static known = vCardProperties;

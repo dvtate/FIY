@@ -1,14 +1,16 @@
 #!/bin/bash
 set -e
 
+BUILD_TYPE="$1"
+
 command -v npm >/dev/null 2>&1 || { echo >&2 "npm is required but not installed.  Aborting."; exit 1; }
 command -v cmake >/dev/null 2>&1 || { echo >&2 "cmake is required but not installed.  Aborting."; exit 1; }
 
+# Build protocol server and mods using cmake
 function build_cpp {
-    local build_type=$1
     mkdir build | :
     cd build
-    if [ "$build_type" = "debug" ]; then
+    if [ "$BUILD_TYPE" = "debug" ]; then
         cmake -DCMAKE_BUILD_TYPE=Debug ..
     else
         cmake ..
@@ -29,8 +31,13 @@ function build_contacts_mod {
     cd ../../..
 }
 
+# Minify portal_frontend assets
+function minify_portal_frontend {
+    : # TODO
+}
+
 # Run build tasks in parallel
-build_cpp "$1" & CPP_PID=$!
+build_cpp & CPP_PID=$!
 build_contacts_mod & CONTACTS_PID=$!
 wait $CPP_PID || exit 1
 wait $CONTACTS_PID || exit 2

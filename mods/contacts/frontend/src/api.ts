@@ -1,3 +1,7 @@
+//
+// API for communicating with the backend
+//
+
 import VC from "./VC";
 
 export const base_uri = "{{fiy_contacts_base_uri}}";

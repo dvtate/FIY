@@ -65,8 +65,8 @@
     <a class="wordmark" href="/">FIY<span>.</span></a>
     <div class="bar-right">
       <nav aria-label="Main navigation">
-        <a href="/portal">Portal</a>
-        <a href="/portal/login" class="current" aria-current="page">Log In</a>
+        <a href="/portal" class="current" aria-current="page">Portal</a>
+        <a href="/portal/login">Log In</a>
         <a href="/portal/signup">Sign Up</a>
       </nav>
       <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">&#9790;</button>
@@ -80,64 +80,41 @@
   <p class="empty-state" id="apps-empty" role="status" hidden></p>
 </main>
 <script>
+  // TODO JSON.parse("")
   const installedApps = {{installed_apps}};
   installedApps.sort((a, b) => a.name.localeCompare(b.name));
 
-  // Build elements with textContent so module metadata is displayed as text.
-  // TODO Revert. These apps are installed and trusted so XSS is actually a feature. (example: widgets)
-  function makeAppEntry(app) {
-    const card = document.createElement('article');
-    card.className = 'app-card';
-    const icon = document.createElement('img');
-    icon.className = 'app-icon';
-    icon.alt = '';
-
-    // TODO don't set icon.src twice it: it always loads
-    icon.src = '/portal/app.svg';
-    if (app.icon) {
-      try {
-        const url = new URL(app.icon, window.location.origin);
-        if (['http:', 'https:'].includes(url.protocol)) icon.src = url.href;
-      } catch (_) { /* Use the built-in icon for invalid URLs. */ }
-    }
-    icon.addEventListener('error', () => { icon.src = '/portal/app.svg'; }, { once: true });
-    const info = document.createElement('div');
-    info.className = 'app-info';
-    const name = document.createElement('h2');
-    name.textContent = app.name;
-    const version = document.createElement('p');
-    version.className = 'version';
-    version.textContent = `${app.id} version ${app.version}`;
-    const description = document.createElement('p');
-    description.textContent = app.description;
-    info.append(name, version, description);
-    const path = document.createElement('div');
-    path.className = 'app-path';
-    const link = document.createElement('a');
-    // Module paths are local, even when metadata contains leading slashes.
-    const localPath = '/' + String(app.path || '').replace(/^[\\/]+/, '');
-    link.setAttribute('href', localPath.replace(/\\/g, '/'));
-    link.textContent = localPath;
-    path.append(link);
-    card.append(icon, info, path);
-    return card;
+  function appEntry(app) {
+    // TODO more than one button?
+    const path = '/' + app.path;
+    return `<article class="app-card">
+    <img class="app-icon" src="${app.icon || '/portal/app.svg'}" alt="${app.id} icon">
+    <div class="app-info">
+      <h2>${app.name}</h2><p class="version">${app.id} version ${app.version}</p><p>${app.description}</p>
+    </div>
+    <div class="app-path"><a href="${path}">${path}</a></div>
+</article>`;
   }
 
   function searchApps() {
+    // Get search results
     const text = document.getElementById('apps-search').value.trim().toLocaleLowerCase();
-    const matches = value => String(value || '').toLocaleLowerCase().includes(text);
-    const titleMatches = installedApps.filter(app => matches(app.name) || matches(app.id));
-    const entries = [...titleMatches, ...installedApps.filter(app => !titleMatches.includes(app) && matches(app.description))];
-    document.getElementById('installed-apps-list').replaceChildren(...entries.map(makeAppEntry));
+    const matches = s => s.toLocaleLowerCase().includes(text);
+    const entries = installedApps.filter(app =>
+      matches(app.name) || matches(app.id) || matches(app.path));
+    entries.push(...installedApps.filter(app =>
+      !entries.includes(app) && matches(app.description)));
+
+    // Show results
+    document.getElementById('installed-apps-list').innerHTML = entries.map(appEntry).join('');
     const empty = document.getElementById('apps-empty');
     empty.hidden = entries.length > 0;
-    empty.textContent = installedApps.length ? 'No apps match your search.' : 'No apps are installed on this instance yet.';
+    empty.textContent = installedApps.length
+      ? 'No apps match your search.'
+      : 'No apps are currently installed on this instance.';
   }
   document.getElementById('apps-search').addEventListener('input', searchApps);
   searchApps();
 </script>
-<footer>
-  FIY — Federate It Yourself.
-</footer>
 </body>
 </html>

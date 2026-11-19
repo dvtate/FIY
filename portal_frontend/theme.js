@@ -18,7 +18,7 @@ function setTheme(dark) {
 
 // Get theme, with default
 let theme = window.localStorage.getItem('theme');
-if (theme === null) {
+if (theme === null || theme === 'auto') {
     window.localStorage.setItem('theme', 'auto');
     setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
 } else {

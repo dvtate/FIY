@@ -75,20 +75,20 @@ bool FIY::start() {
     return true;
 }
 
-/**
- * Restart the protocol server
- */
-void FIY::restart() {
-    char buff[PATH_MAX];
-    if (realpath("/proc/self/exe", buff) != buff) {
-        perror("realpath");
-        LOG_ERR("Failed to get /proc/self/exe.");
-        strcpy(buff, "/proc/self/exe");
-    }
-    if ( execv( buff, nullptr) == -1 )
-        perror("execv");
-    LOG_ERR("Failed to restart");
-}
+// /**
+//  * Restart the protocol server
+//  */
+// void FIY::restart() {
+//     char buff[PATH_MAX];
+//     if (realpath("/proc/self/exe", buff) != buff) {
+//         perror("realpath");
+//         LOG_ERR("Failed to get /proc/self/exe.");
+//         strcpy(buff, "/proc/self/exe");
+//     }
+//     if ( execv( buff, nullptr) == -1 )
+//         perror("execv");
+//     LOG_ERR("Failed to restart");
+// }
 
 const std::string& FIY::base_uri() const {
     static const std::string ret = std::string(config.protocol)

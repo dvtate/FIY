@@ -1,3 +1,7 @@
+//
+// Procedurally generated inputs for editing vCard fields
+//
+
 import { VCProperty } from "./VCProperty";
 import { VCDateTime } from "./VCDateTime";
 import { getTzDb, domain } from "./api";

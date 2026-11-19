@@ -567,7 +567,7 @@ void route_request(std::shared_ptr<Session> conn) {
                         Pages::mm_file<subpath>()
                     };
                     res.set(http::field::content_type, "text/javascript");
-                    res.set(http::field::cache_control, "max-age=604800");
+                    res.set(http::field::cache_control, "public, max-age=604800");
                     conn->respond(conn->prep(std::move(res)));
                     return;
                 } else if (path.starts_with("/main.css")) {
@@ -579,7 +579,7 @@ void route_request(std::shared_ptr<Session> conn) {
                         Pages::mm_file<subpath>()
                     };
                     res.set(http::field::content_type, "text/css");
-                    res.set(http::field::cache_control, "max-age=604800");
+                    res.set(http::field::cache_control, "public, max-age=604800");
                     conn->respond(conn->prep(std::move(res)));
                     return;
                 } else if (path.starts_with("/app.svg")) {
@@ -590,7 +590,7 @@ void route_request(std::shared_ptr<Session> conn) {
                         Pages::mm_file<subpath>()
                     };
                     res.set(http::field::content_type, "image/svg+xml");
-                    res.set(http::field::cache_control, "max-age=604800");
+                    res.set(http::field::cache_control, "public, max-age=604800");
                     conn->respond(conn->prep(std::move(res)));
                     return;
                 } else if (path.starts_with("/redirect")) {
@@ -665,7 +665,7 @@ void route_request(std::shared_ptr<Session> conn) {
                 static constexpr char robots_txt[] = "/robots.txt";
                 res.body() = Pages::file_contents<robots_txt>();
                 res.set(http::field::content_type, "text/plain");
-                res.set("Cache-control", "max-age=60000");
+                res.set(http::field::cache_control, "public, max-age=604800");
                 conn->respond(conn->prep(std::move(res)));
                 return;
             } else {

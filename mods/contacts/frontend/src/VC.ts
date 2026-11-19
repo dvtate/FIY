@@ -1,8 +1,10 @@
-
+//
+// vCard
+//
 import { VCProperty } from "./VCProperty";
-
 import * as API from './api';
 
+/// vCard entity
 export default class VC {
     public static readonly BEGIN_TOKEN = "BEGIN:VCARD";
     public static readonly END_TOKEN = "END:VCARD";

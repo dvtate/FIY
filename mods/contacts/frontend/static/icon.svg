@@ -6,7 +6,6 @@
             <stop offset="100%" stop-color="#2D5BE3"/>
         </linearGradient>
     </defs>
-
     <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#bgGradient)"/>
 
     <!-- User Head -->
