@@ -100,6 +100,8 @@ function mobileDetailsView(goBack = false) {
 
 // TODO accept reference instead of index, apply to all other functions here
 function showContactDetails(index: number) {
+    if (index === -1)
+        index = profileIndex;
     contactDetails.innerHTML = `${contacts[index].showHtml()}<hr>
 <!--<button title="Share"><i class="fa fa-share" id="contact-share"></i></button>-->
 <button title="Download" id="contact-download"><i class="fa fa-download"></i></button>

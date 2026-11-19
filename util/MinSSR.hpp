@@ -18,6 +18,29 @@
 
 namespace MinSSR {
     /**
+     * Concatenate components into a single string, reserving space before appending them
+     * @tparam Args char or StringViewLike
+     * @param args parts to combine into single string
+     * @return concatenated string
+     */
+    template<typename... Args>
+    __attribute__((always_inline))
+    constexpr std::string concat(const Args&... args) {
+        constexpr auto to_sv = []<typename T>(const T& v) constexpr {
+            if constexpr (std::is_same_v<T, char>)
+                return std::string_view(&v, 1);
+            else
+                return std::string_view(v);
+        };
+        return [](const auto ...sv) constexpr {
+            std::string ret;
+            ret.reserve((sv.size() + ...));
+            (ret.append(sv), ...);
+            return ret;
+        }(to_sv(args)...);
+    }
+
+    /**
      * Sorts tags array at compile-time
      * @tparam R should be std::array<std::string_view, N>
      * @param tags input, potentially unsorted array of tags

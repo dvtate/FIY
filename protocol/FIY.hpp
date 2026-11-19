@@ -40,8 +40,7 @@ public:
 
     bool start(int argc, char* argv[]);
     bool start();
-
-    static void restart();
+    // static void restart();
 
     std::time_t now() const {
         return m_now;

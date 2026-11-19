@@ -187,6 +187,24 @@ static void handle_request(const struct fiy::fiy_request_t* request) {
         return;
     }
 
+    // Icon
+    if (path == "/icon.svg") {
+        static constexpr char file_path[] = "icon.svg";
+        req.respond(200,
+            "Cache-Control: max-age=604800\nContent-Type: image/svg+xml",
+            Pages::mm_file_body<file_path>()
+        );
+        return;
+    }
+    if (path == "/favicon.ico") {
+        static constexpr char file_path[] = "favicon.ico";
+        req.respond(200,
+            "Cache-Control: max-age=604800\nContent-Type: image/x-icon",
+            Pages::mm_file_body<file_path>()
+        );
+        return;
+    }
+
     // Everything past here requires a login (either local or federated)
     static const fiy::Response no_auth_resp{
         303,
@@ -279,24 +297,6 @@ static void handle_request(const struct fiy::fiy_request_t* request) {
             );
             return;
         }
-    }
-
-    // Icon
-    if (path == "/icon.svg") {
-        static constexpr char file_path[] = "icon.svg";
-        req.respond(200,
-            "Cache-Control: max-age=604800\nContent-Type: image/svg+xml",
-            Pages::mm_file_body<file_path>()
-        );
-        return;
-    }
-    if (path == "/favicon.ico") {
-        static constexpr char file_path[] = "favicon.ico";
-        req.respond(200,
-            "Cache-Control: max-age=604800\nContent-Type: image/x-icon",
-            Pages::mm_file_body<file_path>()
-        );
-        return;
     }
 
     // Landing page

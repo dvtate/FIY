@@ -28,7 +28,7 @@ struct DataTransferObject {
     };
 
     /// Update values
-    virtual bool from_json(const nlohmann::json& json);
+    virtual bool from_json(const nlohmann::json& json) = 0;
 
     bool json(const std::string_view json) {
         try {

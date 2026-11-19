@@ -1,22 +1,24 @@
-
-
 /////////////////////////////////////////
 // Light/dark mode themes
 /////////////////////////////////////////
+
+// TODO I'm contemplating just using the media query so that we don't need JS at all
 
 // Dark/light mode switch
 const themeBtn = document.getElementById('theme-toggle');
 
 // Change the theme used across the site
 function setTheme(dark) {
-    document.getElementsByTagName('html')[0].setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     if (themeBtn)
-        themeBtn.innerText = String.fromCharCode(dark ? 9788 : 9790);
+        themeBtn.innerText = String.fromCharCode(dark
+            ? 9788 : 9790 // '☀' : '☾'
+        );
 }
 
 // Get theme, with default
 let theme = window.localStorage.getItem('theme');
-if (theme === null) {
+if (theme === null || theme === 'auto') {
     window.localStorage.setItem('theme', 'auto');
     setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
 } else {

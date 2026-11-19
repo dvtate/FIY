@@ -50,9 +50,8 @@ bool FiyConfig::from_argv(const int argc, char** argv) {
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
-            from_file(argv[i]);
-            set_defaults();
-            return false;
+            // Overrides: file must be last argument
+            return from_file(argv[i]);
         }
         const char* p = argv[i];
         while (*p == '-') p++;

@@ -32,7 +32,8 @@ std::string Pages::repo_create_page(
 
 #define FIY_MOD_GIT_REPO_CREATE_RULES(kv) \
     kv("fiy_user", user) \
-    kv("orgs_option_list", orgs_option_list)
+    kv("orgs_option_list", orgs_option_list) \
+    kv("user_orgs_option_list", orgs_option_list)
 
     static constexpr char repo_create[] = "/repo_create.html";
     return MIN_SSR_MUSTACHE(file_contents<repo_create>(), FIY_MOD_GIT_REPO_CREATE_RULES);
@@ -51,11 +52,6 @@ std::string Pages::user_page(const std::string_view user, const char* request_us
 }
 
 
-// This isn't gonna work...
-// Edge cases not handled:
-//  - user not logged in but still shows profile tab
-//  - repo not initialized (ie - no files), should give new repo instructions
-// TODO instead put page data into JSON object and render it with JS on client ?
 std::string Pages::repo_page(const RepoPageData& repo, const char* request_user) {
     // TODO the right way to do this is probably to populate the page data by calling the API
     //      that we already have to implement in order for federation to work.
@@ -66,30 +62,33 @@ std::string Pages::repo_page(const RepoPageData& repo, const char* request_user)
     static constexpr std::string_view visibility_strs[] = {
         "Private", "Instance private", "Federated", "Public"
     };
+    const bool empty = !repo.last_commit.valid();
+    const std::string profile_link = request_user == nullptr ? ""
+        : concat("<a href=\"", fiy::host().base_uri, '/', request_user, "\">Profile</a>");
+    const auto count_str = [](const ssize_t count) {
+        return count < 0 ? std::string("—") : std::to_string(count);
+    };
 
 #define FIY_MOD_GIT_REPO_PAGE_RULES(kv) \
         kv("repo_owner_pfp", pfp_url(repo.owner_user()) ) \
-        kv("last_commit_author_pfp", pfp_url(repo.last_commit.author.local_user()) ) \
         kv("last_commit_author", repo.last_commit.author.profile_link() ) \
         kv("last_commit_time", time_str(repo.last_commit.ts) ) \
         kv("last_commit_time_diff", time_diff_str(fiy::host().now(), repo.last_commit.ts) ) \
-        kv("last_commit_id", repo.last_commit.id ) \
+        kv("last_commit_id_short", std::string_view(repo.last_commit.id).substr(0, 7) ) \
         kv("last_commit_msg", repo.last_commit.message.substr(0, repo.last_commit.message.find('\n')) ) \
         kv("mod_baseurl", fiy::host().base_uri ) \
-        kv("repo_branch", repo.active_branch ) \
-        kv("repo_branches_count", std::to_string(repo.branches_count) ) \
-        kv("repo_commits_count", std::to_string(repo.commits_count) ) \
+        kv("repo_branches_count", count_str(repo.branches_count) ) \
+        kv("repo_commits_count", count_str(repo.commits_count) ) \
         kv("repo_description", repo.description ) \
-        kv("repo_forks_count", std::to_string(-1) ) \
-        kv("repo_likes_count", std::to_string(repo.likes_count) ) \
         kv("repo_name", repo.name ) \
         kv("repo_owner", repo.owner_user() ) \
-        kv("repo_tags_count", std::to_string(repo.commits_count) ) \
-        kv("repo_tickets_count", std::to_string(repo.tickets_count) ) \
+        kv("repo_tags_count", count_str(repo.tags_count) ) \
         kv("repo_visibility", visibility_strs[(size_t)repo.visibility] ) \
         kv("repo_clone_url", fiy::host().base_uri + std::string("/") + repo.path() ) \
         kv("repo_entries_html", repo.entries_html() ) \
-        kv("request_user", request_user == nullptr ? "" : request_user ) \
+        kv("repo_empty_hidden", empty ? "" : "hidden" ) \
+        kv("repo_files_hidden", empty ? "hidden" : "" ) \
+        kv("profile_link", profile_link ) \
         kv("fiy_domain", fiy::host().domain )
 
     return MIN_SSR_MUSTACHE(file_contents<repo_page>(), FIY_MOD_GIT_REPO_PAGE_RULES);
