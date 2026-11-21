@@ -109,7 +109,7 @@ inline void repo_create_post(const fiy::Request& req) {
     if (repo.instance != "") {
         auto* remote_request = new fiy::Request(req);
         remote_request->domain = repo.instance.c_str();
-        fiy::host().request_mod(fiy::host().app_id, remote_request, [remote_request, &req, repo](const fiy::Response* res) {
+        fiy::host().request_mod(fiy::host().app_id, remote_request,[remote_request, &req, repo](const fiy_response_t* res) {
             if (res == nullptr) {
                 const auto body = Pages::error_page(
                     "Peer Request Failed",

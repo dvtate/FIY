@@ -69,7 +69,7 @@ git_revwalk* GitRepo::walker() {
 
 bool GitRepo::open(const BasicRepo& repo) {
     std::lock_guard lock{m_mtx};
-    std::string repo_path = concat(
+    const std::string repo_path = concat(
         fiy::host().data_dir,
         repo.is_local() ? "/repos/" : "/mirrors/",
         repo.path()
@@ -200,8 +200,11 @@ ssize_t GitRepo::branches_count() {
  */
 std::string GitRepo::default_branch() {
     std::lock_guard lock{m_mtx};
+
+    // Empty repo edge case
     if (git_repository_head_unborn(m_repo) == 1)
         return "";
+
     git_reference* head = nullptr;
     std::string ret;
     if (ok(git_repository_head(&head, m_repo))) {

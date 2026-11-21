@@ -13,10 +13,8 @@
  * Git commit author/commiter
  */
 class GitUser {
-protected:
-    std::string fiy_user;
-
 public:
+    std::string fiy_user;
     std::string name;
     std::string email;
 
@@ -28,10 +26,6 @@ public:
         } else {
             return this->fiy_user;
         }
-    }
-
-    const std::string& local_user() const {
-        return this->fiy_user;
     }
 
     /// Sets the local user given a canonical user

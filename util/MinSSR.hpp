@@ -40,6 +40,35 @@ namespace MinSSR {
         }(to_sv(args)...);
     }
 
+//     /// Load entire file contents into a string
+//     /// returns "" if file could not be opened
+//     static std::string file_contents(const std::string& file_path) {
+//         // Open file
+//         std::ifstream in(file_path, std::ios::in | std::ios::binary);
+//         if (!in) [[unlikely]] {
+//             std::string msg = "Error: Could not open file ";
+//             msg += file_path;
+// #ifdef LOG_ERR
+//             LOG_ERR(msg);
+// #else
+//             throw new std::runtime_error(msg);
+// #endif
+//
+//             return ""; // Return an empty string on failure
+//         }
+//
+//         // Prepare buffer to store file contents
+//         std::string contents;
+//         in.seekg(0, std::ios::end);
+//         contents.resize(in.tellg());
+//
+//         // Read file
+//         in.seekg(0, std::ios::beg);
+//         in.read(&contents[0], contents.size());
+//         in.close();
+//         return contents;
+//     }
+
     /**
      * Sorts tags array at compile-time
      * @tparam R should be std::array<std::string_view, N>

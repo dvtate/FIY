@@ -238,7 +238,8 @@ static void signup_post(std::shared_ptr<Session>&& conn) {
     }
     static const std::unordered_set<std::string_view> reserved_usernames = {
         "api", "mod", "app", "help", "home", "index", "new", "about",
-        "error", "create", "delete", "post", "view", "search", "notifications"
+        "error", "create", "delete", "post", "view", "search", "notifications",
+        "settings", "get",
     };
     if (username.size() == 1
         || reserved_usernames.contains(username)

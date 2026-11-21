@@ -311,7 +311,7 @@ namespace fiy {
         void request_mod(
             const char* mod_id,
             struct fiy_request_t* request,
-            std::function<void(const Response*)> callback
+            std::function<void(const fiy_response_t*)> callback
         ) const {
             // Check params
             if (request == nullptr || mod_id == nullptr || callback == nullptr)
@@ -325,8 +325,8 @@ namespace fiy {
             auto* cb = new std::function{std::move(callback)};
             request->context = static_cast<void*>(cb);
             request->callback = [](const fiy_request_t* req, const fiy_response_t* res) {
-                const auto* cb_fn = static_cast<const std::function<void(const Response*)>*>(req->context);
-                (*cb_fn)(static_cast<const Response*>(res));
+                const auto* cb_fn = static_cast<const std::function<void(const fiy_response_t*)>*>(req->context);
+                (*cb_fn)(res);
                 delete cb_fn;
             };
             this->request(mod_id, request);
@@ -398,6 +398,11 @@ namespace fiy {
         }
 
         Request(const fiy_request_t& req): fiy_request_t(req) {}
+
+        static Request* from(fiy_request_t* req) {
+            // This should be safe as long as we don't add any members
+            return static_cast<Request*>(req);
+        }
 
         /**
          * Get user string for request user

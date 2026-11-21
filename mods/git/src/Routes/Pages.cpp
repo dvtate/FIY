@@ -32,8 +32,7 @@ std::string Pages::repo_create_page(
 
 #define FIY_MOD_GIT_REPO_CREATE_RULES(kv) \
     kv("fiy_user", user) \
-    kv("orgs_option_list", orgs_option_list) \
-    kv("user_orgs_option_list", orgs_option_list)
+    kv("orgs_option_list", orgs_option_list)
 
     static constexpr char repo_create[] = "/repo_create.html";
     return MIN_SSR_MUSTACHE(file_contents<repo_create>(), FIY_MOD_GIT_REPO_CREATE_RULES);
@@ -57,23 +56,23 @@ std::string Pages::repo_page(const RepoPageData& repo, const char* request_user)
     //      that we already have to implement in order for federation to work.
     static constexpr char repo_page[] = "/repo.html";
     auto pfp_url = [](const std::string& user) {
-        return fiy::host().host_base_uri() + "/mods/contacts/pfp/" + user;
+        return MinSSR::concat(fiy::host().host_base_uri(), "/mods/contacts/pfp/", user);
     };
     static constexpr std::string_view visibility_strs[] = {
         "Private", "Instance private", "Federated", "Public"
     };
     const bool empty = !repo.last_commit.valid();
     const std::string profile_link = request_user == nullptr ? ""
-        : concat("<a href=\"", fiy::host().base_uri, '/', request_user, "\">Profile</a>");
+        : MinSSR::concat("<a href=\"", fiy::host().base_uri, '/', request_user, "\">Profile</a>");
     const auto count_str = [](const ssize_t count) {
-        return count < 0 ? std::string("—") : std::to_string(count);
+        return count < 0 ? std::string("-") : std::to_string(count);
     };
 
 #define FIY_MOD_GIT_REPO_PAGE_RULES(kv) \
-        kv("repo_owner_pfp", pfp_url(repo.owner_user()) ) \
         kv("last_commit_author", repo.last_commit.author.profile_link() ) \
         kv("last_commit_time", time_str(repo.last_commit.ts) ) \
         kv("last_commit_time_diff", time_diff_str(fiy::host().now(), repo.last_commit.ts) ) \
+        kv("last_commit_id", repo.last_commit.id) \
         kv("last_commit_id_short", std::string_view(repo.last_commit.id).substr(0, 7) ) \
         kv("last_commit_msg", repo.last_commit.message.substr(0, repo.last_commit.message.find('\n')) ) \
         kv("mod_baseurl", fiy::host().base_uri ) \

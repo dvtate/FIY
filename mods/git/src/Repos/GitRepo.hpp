@@ -51,11 +51,12 @@ public:
         Commit() = default;
 
         [[nodiscard]] bool valid() const {
-            return ts != 0;
+            // TODO technically possible for commit date to be 1/1/1970
+            return this->ts != 0;
         }
 
         [[nodiscard]] std::string id_str() const {
-            if (id[0] == '\0')
+            if (this->id[0] == '\0')
                 return {};
             return std::string(this->id, GIT_OID_HEXSZ);
         }

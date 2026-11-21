@@ -12,15 +12,15 @@
  * @return HTML for a link to user's profile or at least a titled span
  */
 std::string GitUser::profile_link() const {
-    if (!fiy_user.empty()) {
+    // FIY user: profile link
+    if (!fiy_user.empty())
         return concat(
             "<a href=\"", fiy::host().base_uri, '/', fiy_user, "\">",
             fiy_user, "</a>"
         );
-    }
 
-    std::string ret;
-    ret = "<span title=\"";
+    // Otherwise: name + email
+    std::string ret = "<span title=\"";
     if (name.empty()) {
         ret += email.empty() ? "unknown" : email;
     } else {
@@ -28,7 +28,7 @@ std::string GitUser::profile_link() const {
         if (!email.empty()) {
             ret += " <";
             ret += email;
-            ret += ">";
+            ret += '>';
         }
     }
     ret += "\">";

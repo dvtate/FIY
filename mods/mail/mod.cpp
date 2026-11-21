@@ -40,6 +40,7 @@ static void send_mail(const fiy::Request& req) {
         return;
     }
 
+    // TODO use string_views
     // Invalid body
     // It should be destination(s) \n subject \n mail body
     std::string body = req.body;
@@ -68,11 +69,14 @@ static void send_mail(const fiy::Request& req) {
 
     // Get mail body
     std::string content = body.substr(i);
-    // use modlib logging functionality
-    std::cout <<"new mail: " <<req.global_user_str() <<" : " <<destinations[0] <<" : " <<subject <<" : " <<content<<std::endl;
+    fiy::host().log_info("New mail from " + req.global_user_str() + " to "
+        + std::to_string(destinations.size()) + " recipients");
+    // std::cout <<"new mail: " <<req.global_user_str() <<" : " <<destinations[0] <<" : " <<subject <<" : " <<content<<std::endl;
+
+    // This mail  Local users
     g_mailbox.push(Mail(req.global_user_str(), destinations, subject, content));
 
-    // Distribute to peers
+    // Request from local user -> deliver it to peers
     if (req.domain == nullptr) {
         // Get unique remote destinations
         std::set<std::string> doms;
@@ -86,18 +90,17 @@ static void send_mail(const fiy::Request& req) {
 
         // Send to destination servers
         for (const auto& dom : doms) {
+            auto* pdom = new std::string(dom);
             auto* req2 = new fiy::Request(req);
-            req2->domain = dom.c_str();
-            fiy::host().request_mod("mail", req2, [req2](const fiy::Response* res) {
+            req2->domain = pdom->c_str();
+            fiy::host().request_mod("mail", req2, [req2, pdom](const fiy::fiy_response_t* res) {
                 if (res == nullptr)
                     fiy::host().log_warning("Failed to send mail to " + std::string(req2->domain));
                 else
                     fiy::host().log_debug("Sent mail to: " + std::string(req2->domain));
                 delete req2;
+                delete pdom;
             });
-
-            std::cout <<"Sending to: " <<dom <<std::endl;
-            fiy::host().request("mail", &req);
         }
     }
     req.respond();
